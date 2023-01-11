@@ -7,16 +7,21 @@ const RegisterForm = () => {
     name: '',
     email: '',
     password: '',
+    image: null,
+    showPassword: false,
+    loading: false,
   });
-  const [showPassword, setShowPassword] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
 
+  const handleUpload = async (file) => {};
+
   const handleLogin = async (e) => {
     e.preventDefault();
+
     try {
     } catch (error) {
       toast.error(error.response.data.error);
@@ -37,8 +42,8 @@ const RegisterForm = () => {
           onChange={handleChange}
           placeholder="Please enter your full name"
           className="px-4 text-sm w-full h-11 text-gray-700 bg-white placeholder:text-gray-400 placeholder:font-light 
-    border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-offset-2 focus:ring-blue-200 
-    duration-150 ease-linear outline-none rounded-md"
+          border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-offset-2 focus:ring-blue-200 
+          duration-150 ease-linear outline-none rounded-md"
         />
       </div>
       <div>
@@ -52,8 +57,8 @@ const RegisterForm = () => {
           onChange={handleChange}
           placeholder="Please enter your email address"
           className="px-4 text-sm w-full h-11 text-gray-700 bg-white placeholder:text-gray-400 placeholder:font-light 
-    border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-offset-2 focus:ring-blue-200 
-    duration-150 ease-linear outline-none rounded-md"
+          border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-offset-2 focus:ring-blue-200 
+          duration-150 ease-linear outline-none rounded-md"
         />
       </div>
       <div>
@@ -62,20 +67,20 @@ const RegisterForm = () => {
         </label>
         <div className="relative">
           <input
-            type={showPassword ? 'text' : 'password'}
+            type={formData.showPassword ? 'text' : 'password'}
             name="password"
             value={formData.password}
             onChange={handleChange}
             placeholder="Please enter your password"
             className="px-4 text-sm w-full h-11 text-gray-700 bg-white placeholder:text-gray-400 placeholder:font-light 
-    border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-offset-2 focus:ring-blue-200 
-    duration-150 ease-linear outline-none rounded-md"
+            border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-offset-2 focus:ring-blue-200 
+            duration-150 ease-linear outline-none rounded-md"
           />
           <span
-            onClick={() => setShowPassword(!showPassword)}
+            onClick={() => setFormData({ ...formData, showPassword: !formData.showPassword })}
             className="absolute top-1/2 right-2 transform -translate-y-1/2 block p-2 bg-white hover:bg-gray-100 rounded-full cursor-pointer select-none"
           >
-            {showPassword ? <FaRegEyeSlash /> : <FaRegEye />}
+            {formData.showPassword ? <FaRegEyeSlash /> : <FaRegEye />}
           </span>
         </div>
       </div>
@@ -89,23 +94,18 @@ const RegisterForm = () => {
             type="file"
             multiple={false}
             accept="image/*"
+            onChange={(e) => handleUpload(e.target.files[0])}
             className="w-full h-full opacity-0 cursor-pointer z-10"
           />
         </div>
-        <span className="block mt-1 text-sm text-gray-500 font-light">Only Jpg, Jpeg, Png</span>
+        <span className="block mt-2 text-sm text-gray-500 font-light">Only Jpg, Jpeg, Png</span>
       </div>
-      <div className="flex gap-3">
+      <div className="">
         <button
           type="submit"
           className="inline-block w-full h-11 font-medium rounded-md transition border border-blue-500 text-white bg-blue-600 hover:bg-blue-500"
         >
           Register
-        </button>
-        <button
-          type="button"
-          className="inline-block w-full h-11 font-medium rounded-md transition border border-gray-300 hover:border-gray-500 text-gray-500 hover:text-gray-700"
-        >
-          Clear
         </button>
       </div>
     </form>

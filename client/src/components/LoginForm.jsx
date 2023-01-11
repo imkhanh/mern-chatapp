@@ -1,14 +1,17 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { FaRegEye, FaRegEyeSlash } from 'react-icons/fa';
 import { loginReq } from '../utils/Requests';
 import toast from 'react-hot-toast';
 
 const LoginForm = () => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     email: '',
     password: '',
+    showPassword: false,
+    loading: false,
   });
-  const [showPassword, setShowPassword] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -20,7 +23,10 @@ const LoginForm = () => {
 
     try {
       const { data } = await loginReq(formData);
-      console.log(data);
+      if (data) {
+        localStorage.setItem('profile', JSON.stringify(data));
+        navigate('/chats');
+      }
     } catch (error) {
       toast.error(error.response.data.error);
       return;
@@ -54,7 +60,7 @@ const LoginForm = () => {
         </label>
         <div className="relative">
           <input
-            type={showPassword ? 'text' : 'password'}
+            type={formData.showPassword ? 'text' : 'password'}
             name="password"
             value={formData.password}
             onChange={handleChange}
@@ -64,10 +70,10 @@ const LoginForm = () => {
             duration-150 ease-linear outline-none rounded-md"
           />
           <span
-            onClick={() => setShowPassword(!showPassword)}
+            onClick={() => setFormData({ ...formData, showPassword: !formData.showPassword })}
             className="absolute top-1/2 right-2 transform -translate-y-1/2 block p-2 bg-white hover:bg-gray-100 rounded-full cursor-pointer select-none"
           >
-            {showPassword ? <FaRegEyeSlash /> : <FaRegEye />}
+            {formData.showPassword ? <FaRegEyeSlash /> : <FaRegEye />}
           </span>
         </div>
       </div>
