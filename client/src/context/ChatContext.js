@@ -10,6 +10,7 @@ export const ChatProvider = ({ children }) => {
   const [selectedChat, setSelectedChat] = useState(null);
   const [chats, setChats] = useState([]);
   const [notification, setNotification] = useState([]);
+  const [fetchAgain, setFetchAgain] = useState(false);
 
   useEffect(() => {
     const profile = JSON.parse(localStorage.getItem('profile'));
@@ -21,7 +22,18 @@ export const ChatProvider = ({ children }) => {
 
   return (
     <ChatContext.Provider
-      value={{ user, setUser, chats, setChats, selectedChat, setSelectedChat, notification, setNotification }}
+      value={{
+        user,
+        setUser,
+        chats,
+        setChats,
+        selectedChat,
+        setSelectedChat,
+        notification,
+        setNotification,
+        fetchAgain,
+        setFetchAgain,
+      }}
     >
       {children}
     </ChatContext.Provider>

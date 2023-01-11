@@ -11,7 +11,6 @@ const Avatar = ({ size = '40px', alt, src }) => {
           height: size,
           objectFit: 'cover',
           background: 'white',
-          border: '1px solid #eee',
           borderRadius: '50%',
         }}
       />

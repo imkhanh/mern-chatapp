@@ -10,7 +10,7 @@ import {
 import { accessChat, searchUser } from '../utils/Requests';
 import { ChatState } from '../context/ChatContext';
 import { useNavigate } from 'react-router-dom';
-import UserItem from './UserItem';
+import UserListItem from './UserItem';
 import SkeletonItem from './SkeletonItem';
 import Loader from './Loader';
 
@@ -97,7 +97,7 @@ const Header = () => {
           className={`${
             search ? 'pl-3' : 'pl-9'
           } w-full h-full text-gray-700 bg-gray-100 placeholder:text-[15px] placeholder:text-black/40 
-          border border-gray-200 outline-none rounded-md duration-150 ease-linear`}
+          border border-gray-200 outline-none rounded-lg duration-150 ease-linear`}
         />
         {search && (
           <>
@@ -117,10 +117,10 @@ const Header = () => {
                 <SkeletonItem count={6} />
               ) : searchResult.length > 0 ? (
                 searchResult.map((user) => (
-                  <UserItem key={user._id} user={user} handleClick={() => handleAccessChat(user)} />
+                  <UserListItem key={user._id} user={user} handleClick={() => handleAccessChat(user)} />
                 ))
               ) : (
-                <div>
+                <div className="py-12">
                   <p className="text-slate-500 font-light italic">No search result</p>
                 </div>
               )}
@@ -137,12 +137,13 @@ const Header = () => {
               setSelected({ ...selected, profile: !selected.profile, notify: false });
             }}
             className={`${
-              selected.profile ? 'bg-blue-50 text-blue-600' : 'white text-gray-900'
+              selected.profile ? 'bg-gray-100 text-blue-600' : 'bg-white text-gray-900'
             } px-2 py-1 flex items-center hover:cursor-pointer select-none rounded-full`}
           >
             <img alt={user.user?.name} src={user.user?.image} className="w-8 h-8 object-cover bg-white rounded-full" />
-            <span className="ml-2 mr-1 text-sm font-medium">{user.user?.name}</span>
+            <span className="ml-2.5 mr-1 !text-base font-medium">{user.user?.name}</span>
           </div>
+
           {selected.profile && (
             <div className="absolute mt-2 right-0 origin-top-right w-44 bg-white border border-gray-100 rounded-md shadow-lg z-10">
               <div className="m-1 px-4 py-2 flex items-center text-gray-700 hover:text-gray-900 hover:bg-gray-100 hover:cursor-pointer rounded-md">
@@ -167,7 +168,7 @@ const Header = () => {
               setSelected({ ...selected, notify: !selected.notify, profile: false });
             }}
             className={`${
-              selected.notify ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-900'
+              selected.notify ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-900'
             } block p-2 rounded-full cursor-pointer select-none`}
           >
             <IoNotifications className="text-lg" />
