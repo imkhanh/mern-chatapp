@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaRegEye, FaRegEyeSlash } from 'react-icons/fa';
-import { loginReq } from '../utils/Requests';
+import { loginReq } from 'utils/Requests';
 import toast from 'react-hot-toast';
 
 const LoginForm = () => {
@@ -22,9 +22,9 @@ const LoginForm = () => {
     e.preventDefault();
 
     try {
-      const { data } = await loginReq(formData);
-      if (data) {
-        localStorage.setItem('profile', JSON.stringify(data));
+      const res = await loginReq(formData);
+      if (res.data) {
+        localStorage.setItem('profile', JSON.stringify(res.data));
         navigate('/chats');
       }
     } catch (error) {

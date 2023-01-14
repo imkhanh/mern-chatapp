@@ -4,7 +4,7 @@ const API = axios.create({ baseURL: `${process.env.REACT_APP_BASE_URL}/api` });
 
 API.interceptors.request.use((req) => {
   if (localStorage.getItem('profile')) {
-    req.headers.Authorization = `Bearer ${JSON.parse(localStorage.getItem('profile')).token}`;
+    req.headers.Authorization = `Bearer ${JSON.parse(localStorage.getItem('profile'))?.token}`;
   }
   return req;
 });
@@ -14,7 +14,7 @@ export const loginReq = (data) => API.post('/user/login', data);
 export const registerReq = (data) => API.post('/user/register', data);
 
 export const getAllChats = () => API.get('/chat/get-all');
-export const accessChat = (userId) => API.post('/chat/access-chat', { userId });
+export const accessChat = (user) => API.post('/chat/access-chat', { user });
 export const deleteChat = (chatId) => API.delete(`/chat/delete-chat/${chatId}`);
 export const createGroup = (data) => API.post('/chat/create-group', data);
 export const renameGroup = (data) => API.patch('/chat/rename-group', data);

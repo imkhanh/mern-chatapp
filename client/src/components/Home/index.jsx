@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import LoginForm from '../components/LoginForm';
-import RegisterForm from '../components/RegisterForm';
 import { useNavigate } from 'react-router-dom';
+import LoginForm from './LoginForm';
+import RegisterForm from './RegisterForm';
 
 const Home = () => {
   const navigate = useNavigate();
@@ -19,7 +19,9 @@ const Home = () => {
       <div className="col-span-3">
         <div className="pt-24 px-12 space-y-8">
           <div>
-            <h1 className="text-2xl text-gray-900 font-bold uppercase">{isLogin ? 'Login' : 'Register'}</h1>
+            <h1 className="text-2xl text-gray-900 font-bold uppercase">
+              {isLogin ? 'Login' : 'Register'}
+            </h1>
           </div>
 
           <div>{isLogin ? <LoginForm /> : <RegisterForm />}</div>
