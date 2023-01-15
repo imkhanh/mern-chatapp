@@ -1,7 +1,7 @@
 import React from 'react';
 import { ChatState } from 'context/ChatContext';
-import ChatSidebar from './ChatSidebar';
-import ChatView from './ChatView';
+import ChatSidebar from 'components/ChatSidebar';
+import ChatView from 'components/ChatView';
 
 const Chats = () => {
   const { user } = ChatState();

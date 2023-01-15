@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaRegEye, FaRegEyeSlash } from 'react-icons/fa';
-import { loginReq } from 'utils/Requests';
+import { loginReq } from 'api';
 import toast from 'react-hot-toast';
 
 const LoginForm = () => {

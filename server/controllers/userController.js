@@ -16,11 +16,7 @@ const userController = {
 
       const users = await User.find(keyword).find({ _id: { $ne: req.user._id } });
 
-      if (users.length === 0) {
-        return res.status(400).json({ error: 'User does not exist' });
-      } else {
-        return res.status(200).json(users);
-      }
+      return res.status(200).json(users);
     } catch (error) {
       return res.status(500).json(error.message);
     }

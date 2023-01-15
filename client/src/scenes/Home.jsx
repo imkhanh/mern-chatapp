@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import LoginForm from './LoginForm';
-import RegisterForm from './RegisterForm';
+import LoginForm from '../components/LoginForm';
+import RegisterForm from '../components/RegisterForm';
 
 const Home = () => {
   const navigate = useNavigate();
