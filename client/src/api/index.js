@@ -18,6 +18,6 @@ export const accessChat = (user) => API.post('/chat/access-chat', { user });
 export const deleteChat = (id) => API.delete(`/chat/delete-chat/${id}`);
 export const createGroup = (data) => API.post('/chat/create-group', data);
 export const addToGroup = (id, userId) => API.patch(`/chat/add-group/${id}`, { userId });
-export const renameGroup = (id, userId) => API.patch(`/chat/rename-group/${id}`, { userId });
+export const renameGroup = (id, chatName) => API.patch(`/chat/rename-group/${id}`, { chatName });
 export const removeFromGroup = (id, chatName) =>
   API.patch(`/chat/remove-group/${id}`, { chatName });

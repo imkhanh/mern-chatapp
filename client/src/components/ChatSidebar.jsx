@@ -8,15 +8,15 @@ import Loader from './Loader';
 import moment from 'moment';
 
 const ChatSidebar = () => {
-  const { user, chats, setChats, selectedChat, setSelectedChat } = ChatState();
+  const { user, chats, setChats, selectedChat, setSelectedChat, fetchAgain } = ChatState();
   const [loading, setLoading] = useState(false);
-  const [isOpen, setIsOpen] = useState(false);
+  const [isCreate, setIsCreate] = useState(false);
 
   useEffect(() => {
     fetchAllChats();
 
     // eslint-disable-next-line
-  }, []);
+  }, [fetchAgain]);
 
   const fetchAllChats = async () => {
     setLoading(true);
@@ -56,7 +56,7 @@ const ChatSidebar = () => {
         <span className="text-base font-medium text-gray-900">My Chats</span>
 
         <span
-          onClick={() => setIsOpen(true)}
+          onClick={() => setIsCreate(true)}
           className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-800 hover:text-gray-900 cursor-pointer select-none"
         >
           <IoCreateOutline className="text-lg" />
@@ -80,10 +80,14 @@ const ChatSidebar = () => {
                   <div className="flex -space-x-4">
                     {chat.users.slice(0, 2).map((u) => (
                       <img
-                        key={user._id}
+                        key={u._id}
                         alt={u.name}
                         src={u.image}
-                        className="w-12 h-12 rounded-full bg-white object-cover"
+                        className={`${
+                          chat.users.length === 1
+                            ? 'w-12 h-12'
+                            : 'w-8 h-8 first:z-10 first:mt-3 border-2 border-white'
+                        } rounded-full bg-white object-cover`}
                       />
                     ))}
                   </div>
@@ -121,7 +125,7 @@ const ChatSidebar = () => {
         )}
       </div>
 
-      {isOpen && <CreateGroupModal setIsOpen={setIsOpen} />}
+      {isCreate && <CreateGroupModal setIsCreate={setIsCreate} />}
     </section>
   );
 };

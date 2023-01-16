@@ -16,7 +16,7 @@ const userController = {
 
       const users = await User.find(keyword).find({ _id: { $ne: req.user._id } });
 
-      return res.status(200).json(users);
+      return res.status(200).json({ users });
     } catch (error) {
       return res.status(500).json(error.message);
     }

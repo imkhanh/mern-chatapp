@@ -61,12 +61,11 @@ const chatController = {
     }
   },
   createGroupChat: async (req, res) => {
-    const { groupName, users } = req.body;
-
     try {
-      if (!groupName || !users) {
+      if (!req.body.chatName || !req.body.users) {
         return res.status(400).json({ error: 'Fields must be required' });
       }
+      const users = JSON.parse(req.body.users);
 
       if (users.length < 2) {
         return res.status(400).json({ error: 'A group must have at least 3 members' });
@@ -75,7 +74,7 @@ const chatController = {
       users.push(req.user);
 
       const createGroup = await Chat.create({
-        name: groupName,
+        chatName: req.body.chatName,
         users: users,
         isGroupChat: true,
         groupAdmin: req.user._id,

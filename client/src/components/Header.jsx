@@ -1,18 +1,20 @@
 import React, { useEffect, useRef, useState } from 'react';
 import {
+  IoAlertCircleOutline,
   IoCloseOutline,
   IoHelpCircleOutline,
   IoLogOutOutline,
   IoNotifications,
   IoPersonCircleOutline,
   IoSearchOutline,
-  IoSettingsOutline,
   IoSyncOutline,
 } from 'react-icons/io5';
 import { useNavigate } from 'react-router-dom';
 import { accessChat, searchUser } from 'api';
 import { ChatState } from 'context/ChatContext';
 import Loader from './Loader';
+import UserListItem from './UserListItem';
+import ProfileModal from './ProfileModal';
 
 const Header = () => {
   const { user, chats, setChats, setSelectedChat } = ChatState();
@@ -21,6 +23,7 @@ const Header = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [loadingChat, setLoadingChat] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
   const [selected, setSelected] = useState({
     profile: false,
     notify: false,
@@ -48,7 +51,7 @@ const Header = () => {
       setLoading(true);
       try {
         const { data } = await searchUser(search);
-        setUsers(data);
+        setUsers(data.users);
         setLoading(false);
       } catch (error) {
         console.log(error);
@@ -92,9 +95,9 @@ const Header = () => {
         <input
           type="text"
           id="search"
+          placeholder="Search"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search"
           className={`${
             search ? 'pl-3' : 'pl-10'
           } w-full h-full placeholder:text-[15px] placeholder:text-black/40 bg-gray-100 outline-none border border-gray-200 rounded-lg duration-150 ease-linear`}
@@ -113,35 +116,23 @@ const Header = () => {
               )}
             </span>
             <div
-              className="py-2 absolute mt-2 origin-top-right w-full max-h-[376px] overflow-y-scroll bg-white border border-gray-100 
+              className="py-2 absolute mt-2 origin-top-right w-full max-h-[376px] overflow-y-scroll bg-white border border-gray-200 
       rounded-md shadow-lg z-10"
             >
               {loading ? (
-                <div className="py-12 flex items-center justify-center text-black/40">
+                <div className="h-[360px] flex items-center justify-center text-black/40">
                   <IoSyncOutline className="text-lg animate-spin" />
                 </div>
               ) : users && users.length > 0 ? (
                 users.map((user) => (
-                  <div
+                  <UserListItem
                     key={user._id}
-                    onClick={() => handleAccessChat(user)}
-                    className="px-4 py-2 flex items-center hover:bg-gray-100 hover:cursor-pointer"
-                  >
-                    <figure>
-                      <img
-                        alt={user?.name}
-                        src={user?.image}
-                        className="w-10 h-10 object-cover rounded-full bg-white"
-                      />
-                    </figure>
-                    <div className="ml-3 flex-1">
-                      <h3>{user.name}</h3>
-                      <p className="text-sm text-black/40 font-light">{user.email}</p>
-                    </div>
-                  </div>
+                    user={user}
+                    handleClick={() => handleAccessChat(user)}
+                  />
                 ))
               ) : (
-                <div className="">
+                <div className="h-[360px] flex items-center justify-center text-black/40">
                   <p>User does not exists</p>
                 </div>
               )}
@@ -156,7 +147,7 @@ const Header = () => {
             onClick={() => setSelected({ ...selected, profile: !selected.profile, notify: false })}
             className={`${
               selected.profile ? 'bg-blue-50 text-blue-600' : 'bg-white'
-            } pl-1 py-1 flex items-center rounded-full cursor-pointer select-none`}
+            } px-1.5 py-0.5 flex items-center rounded-full cursor-pointer select-none`}
           >
             <img
               alt={user.user.name}
@@ -167,31 +158,47 @@ const Header = () => {
           </div>
 
           {selected.profile && (
-            <div
-              className="absolute mt-2 right-1/2 transform translate-x-1/2 w-52 h-auto bg-white border border-gray-100 
+            <ul
+              className="absolute mt-2 right-1/2 transform translate-x-1/2 w-52 h-auto bg-white border border-gray-200 
       rounded-md shadow-lg z-10"
             >
-              <div className="m-1 px-4 py-[10px] flex items-center text-gray-700 hover:text-gray-900 bg-white hover:bg-gray-100 rounded-md cursor-pointer transition-colors">
-                <IoPersonCircleOutline className="text-lg" />
-                <span className="ml-4 text-sm font-medium">Profile</span>
-              </div>
-              <div className="m-1 px-4 py-[10px] flex items-center text-gray-700 hover:text-gray-900 bg-white hover:bg-gray-100 rounded-md cursor-pointer transition-colors">
-                <IoSettingsOutline className="text-lg" />
-                <span className="ml-4 text-sm font-medium">Setting</span>
-              </div>
-              <div className="m-1 px-4 py-[10px] flex items-center text-gray-700 hover:text-gray-900 bg-white hover:bg-gray-100 rounded-md cursor-pointer transition-colors">
-                <IoHelpCircleOutline className="text-lg" />
-                <span className="ml-4 text-sm font-medium">Q&A</span>
-              </div>
-              <div className="w-full h-px bg-gray-200" />
-              <div
-                onClick={logout}
-                className="m-1 px-4 py-[10px] flex items-center text-gray-700 hover:text-gray-900 bg-white hover:bg-gray-100 rounded-md cursor-pointer transition-colors"
-              >
-                <IoLogOutOutline className="text-lg" />
-                <span className="ml-4 text-sm font-medium">Logout</span>
-              </div>
-            </div>
+              <li>
+                <div
+                  onClick={() => {
+                    setIsOpen(true);
+                    setSelected({ ...selected, notify: false, profile: false });
+                  }}
+                  className="m-1 px-4 py-[10px] flex items-center text-gray-700 hover:text-gray-900 bg-white hover:bg-gray-100 rounded-md cursor-pointer transition-colors"
+                >
+                  <IoPersonCircleOutline className="text-lg" />
+                  <span className="ml-4 text-sm font-medium">Profile</span>
+                </div>
+              </li>
+              <li>
+                <div className="m-1 px-4 py-[10px] flex items-center text-gray-700 hover:text-gray-900 bg-white hover:bg-gray-100 rounded-md cursor-pointer transition-colors">
+                  <IoAlertCircleOutline className="text-lg" />
+                  <span className="ml-4 text-sm font-medium">Support</span>
+                </div>
+              </li>
+              <li>
+                <div className="m-1 px-4 py-[10px] flex items-center text-gray-700 hover:text-gray-900 bg-white hover:bg-gray-100 rounded-md cursor-pointer transition-colors">
+                  <IoHelpCircleOutline className="text-lg" />
+                  <span className="ml-4 text-sm font-medium">Q&A</span>
+                </div>
+              </li>
+              <li>
+                <div className="w-full h-px bg-gray-200" />
+              </li>
+              <li>
+                <div
+                  onClick={logout}
+                  className="m-1 px-4 py-[10px] flex items-center text-gray-700 hover:text-gray-900 bg-white hover:bg-gray-100 rounded-md cursor-pointer transition-colors"
+                >
+                  <IoLogOutOutline className="text-lg" />
+                  <span className="ml-4 text-sm font-medium">Logout</span>
+                </div>
+              </li>
+            </ul>
           )}
         </div>
 
@@ -205,7 +212,7 @@ const Header = () => {
 
           {selected.notify && (
             <div
-              className="absolute mt-2 right-0 origin-top-right w-80 h-full bg-white border border-gray-100 
+              className="absolute mt-2 right-0 origin-top-right w-80 h-full bg-white border border-gray-200 
               rounded-md shadow-lg z-10"
             >
               Notifications
@@ -215,6 +222,7 @@ const Header = () => {
       </div>
 
       {loadingChat && <Loader />}
+      {isOpen && <ProfileModal user={user.user} setIsOpen={setIsOpen} />}
     </header>
   );
 };
