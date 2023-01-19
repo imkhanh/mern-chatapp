@@ -11,7 +11,6 @@ const chatController = {
       }
 
       let isChat = await Chat.find({
-        isGroupChat: false,
         $and: [
           { users: { $elemMatch: { $eq: req.user._id } } },
           { users: { $elemMatch: { $eq: user } } },
@@ -90,15 +89,15 @@ const chatController = {
     }
   },
   addToGroupChat: async (req, res) => {
-    const { userId } = req.body;
+    const { chatId, userId } = req.body;
 
     try {
-      if (!userId) {
-        return res.status(400).json({ error: 'User does not exists' });
+      if (!chatId || !userId) {
+        return res.status(400).json({ error: 'Please fill all the fields' });
       }
 
       const chatData = await Chat.findByIdAndUpdate(
-        { _id: req.params.id },
+        chatId,
         {
           $push: { users: userId },
         },
@@ -113,15 +112,15 @@ const chatController = {
     }
   },
   removeFromGroupChat: async (req, res) => {
-    const { userId } = req.body;
+    const { chatId, userId } = req.body;
 
     try {
-      if (!userId) {
-        return res.status(400).json({ error: 'User does not exists' });
+      if (!chatId || !userId) {
+        return res.status(400).json({ error: 'Please fill all the fields' });
       }
 
       const chatData = await Chat.findByIdAndUpdate(
-        { _id: req.params.id },
+        chatId,
         {
           $pull: { users: userId },
         },
@@ -136,15 +135,15 @@ const chatController = {
     }
   },
   renameGroupChat: async (req, res) => {
-    const { chatName } = req.body;
+    const { chatId, chatName } = req.body;
 
     try {
-      if (!chatName) {
-        return res.status(400).json({ error: 'Please enter group name' });
+      if (!chatName || !chatId) {
+        return res.status(400).json({ error: 'Please fill all the fields' });
       }
 
       const chatData = await Chat.findByIdAndUpdate(
-        { _id: req.params.id },
+        chatId,
         {
           chatName: chatName,
         },
@@ -159,8 +158,10 @@ const chatController = {
     }
   },
   deleteChat: async (req, res) => {
+    const { chatId } = req.body;
+
     try {
-      await Chat.findByIdAndDelete(req.params.id);
+      await Chat.findByIdAndDelete({ _id: chatId });
       return res.json({ success: true });
     } catch (error) {
       return res.status(500).json({ error: error.message });

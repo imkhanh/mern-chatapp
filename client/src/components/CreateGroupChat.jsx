@@ -1,14 +1,15 @@
 import React, { useEffect, useState } from 'react';
-import { IoCloseOutline, IoSyncOutline } from 'react-icons/io5';
-import { ChatState } from 'context/ChatContext';
 import { createGroup, searchUser } from 'api';
+import { IoClose, IoSync } from 'react-icons/io5';
+import { ChatState } from 'context/ChatContext';
 import UserListItem from './UserListItem';
+import Skeleton from './Skeleton';
 import UserBadgeItem from './UserBadgeItem';
-import Loader from './Loader';
 import { toast } from 'react-hot-toast';
+import Loader from './Loader';
 
-const CreateGroupModal = ({ setIsCreate }) => {
-  const { user, chats, setChats } = ChatState();
+const CreateGroupChat = ({ setIsCreateGroup }) => {
+  const { user, chats, setChats, setSelectedChat } = ChatState();
 
   const [search, setSearch] = useState('');
   const [groupName, setGroupName] = useState('');
@@ -22,6 +23,7 @@ const CreateGroupModal = ({ setIsCreate }) => {
       if (!search) return;
 
       setLoading(true);
+
       try {
         const { data } = await searchUser(search);
         setUsers(data.users);
@@ -36,7 +38,7 @@ const CreateGroupModal = ({ setIsCreate }) => {
 
   const handleAddUser = (user) => {
     if (selectedUser.includes(user)) {
-      toast.error('This user already added to group');
+      toast.error('User already added to group');
       return;
     }
     setSelectedUser([...selectedUser, user]);
@@ -50,7 +52,7 @@ const CreateGroupModal = ({ setIsCreate }) => {
     e.preventDefault();
 
     if (user.user.email === 'guest@gmail.com') {
-      toast.error('Guest user can not create the group');
+      toast.error('Guest user can not create group');
       return;
     }
 
@@ -66,14 +68,18 @@ const CreateGroupModal = ({ setIsCreate }) => {
 
     setSubmitting(true);
 
+    const userString = JSON.stringify(selectedUser.map((u) => u._id));
+
     try {
-      const userString = JSON.stringify(selectedUser.map((v) => v._id));
-
       const { data } = await createGroup({ chatName: groupName, users: userString });
-      setChats([...chats, data]);
-      toast.success(`A ${data.chatName} group created successfully`);
+      if (!chats.find((u) => u._id === data._id)) {
+        setChats([...chats, data]);
+      }
+      setSelectedChat(data);
 
-      setIsCreate(false);
+      toast.success(`${data.chatName} group created successfully`);
+
+      setIsCreateGroup(false);
       setSubmitting(false);
     } catch (error) {
       toast.error(error.response.data.error);
@@ -85,16 +91,23 @@ const CreateGroupModal = ({ setIsCreate }) => {
   if (submitting) return <Loader />;
 
   return (
-    <div className="fixed inset-0 bg-black/50 w-full h-full z-50">
-      <div className="relative top-1/2 transform -translate-y-1/2 mx-auto p-8 border border-gray-50 max-w-xl w-full shadow-lg rounded-md bg-white z-[100]">
-        <div className="mb-8 flex items-center justify-between">
-          <span className="text-gray-900 text-xl font-bold">Create Group Chat</span>
-          <span
-            onClick={() => setIsCreate(false)}
-            className="absolute top-4 right-4 p-2 rounded-full text-gray-600 hover:text-gray-900 bg-gray-50 hover:bg-gray-100 cursor-pointer"
+    <div>
+      <div
+        onClick={() => setIsCreateGroup(false)}
+        className="fixed inset-0 w-full h-full bg-black/40 z-50"
+      />
+      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 p-8 max-w-xl w-full h-auto bg-white rounded-md shadow-lg z-[100]">
+        <div className="mb-8">
+          <h4 className="text-gray-900 text-xl font-bold">
+            <span className="underline underline-offset-4 decoration-blue-300">Create</span> Group
+          </h4>
+          <button
+            type="button"
+            onClick={() => setIsCreateGroup(false)}
+            className="absolute top-4 right-4 p-2 rounded-full text-gray-500 hover:text-gray-900 bg-white hover:bg-gray-50 transition"
           >
-            <IoCloseOutline className="text-lg" />
-          </span>
+            <IoClose className="text-lg" />
+          </button>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -115,12 +128,11 @@ const CreateGroupModal = ({ setIsCreate }) => {
           </div>
           <div>
             <label htmlFor="search" className="block mb-2 font-medium text-gray-700">
-              Search
+              Search Name
             </label>
             <div className="relative">
               <input
                 type="text"
-                id="search"
                 name="search"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
@@ -129,16 +141,12 @@ const CreateGroupModal = ({ setIsCreate }) => {
           border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-offset-2 focus:ring-blue-200 
           duration-150 ease-linear outline-none rounded-md"
               />
-
               {search && (
-                <span className="absolute top-1/2 right-3 transform -translate-y-1/2 text-lg text-black/40">
+                <span className="absolute top-1/2 right-1 -translate-y-1/2 p-2 text-gray-500 transition hover:text-gray-700 cursor-pointer">
                   {loading ? (
-                    <IoSyncOutline className="text-lg animate-spin" />
+                    <IoSync className="animate-spin" />
                   ) : (
-                    <IoCloseOutline
-                      className="text-lg hover:cursor-pointer"
-                      onClick={() => setSearch('')}
-                    />
+                    <IoClose onClick={() => setSearch('')} />
                   )}
                 </span>
               )}
@@ -147,8 +155,8 @@ const CreateGroupModal = ({ setIsCreate }) => {
 
           {selectedUser.length > 0 && (
             <div>
-              <label htmlFor="members" className="block mb-2 font-medium text-gray-700">
-                Members
+              <label htmlFor="groupMembers" className="block mb-2 font-medium text-gray-700">
+                Group Members
               </label>
               <div className="flex items-center flex-wrap gap-1.5">
                 {selectedUser.map((user) => (
@@ -163,11 +171,9 @@ const CreateGroupModal = ({ setIsCreate }) => {
           )}
 
           {search && (
-            <div className="border-l border-blue-500 w-full max-h-[240px] overflow-y-scroll">
+            <div className="w-full max-h-[240px] overflow-y-scroll">
               {loading ? (
-                <div className="h-[240px] flex items-center justify-center text-black/40">
-                  <IoSyncOutline className="text-lg animate-spin" />
-                </div>
+                <Skeleton count={4} />
               ) : users && users.length > 0 ? (
                 users.map((user) => (
                   <UserListItem
@@ -177,8 +183,8 @@ const CreateGroupModal = ({ setIsCreate }) => {
                   />
                 ))
               ) : (
-                <div className="h-[240px] flex items-center justify-center text-black/40">
-                  <p>User does not exists</p>
+                <div className="py-8 flex items-center justify-center">
+                  <p className="text-gray-400 font-light italic">User does not exist</p>
                 </div>
               )}
             </div>
@@ -187,16 +193,17 @@ const CreateGroupModal = ({ setIsCreate }) => {
           <div className="flex justify-end gap-3">
             <button
               type="button"
-              onClick={() => setIsCreate(false)}
-              className="px-8 py-2.5 text-sm font-medium text-gray-900 hover:text-red-500 bg-white focus:ring-2 focus:ring-gray-300 rounded-md"
+              onClick={() => setIsCreateGroup(false)}
+              className="px-6 py-2 font-medium rounded-md text-gray-600 hover:text-gray-900 bg-white hover:bg-gray-100 transition"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="px-8 py-2.5 text-sm font-medium text-white bg-blue-500 hover:bg-blue-600 focus:ring-2 focus:ring-blue-300 rounded-md"
+              disabled={submitting}
+              className="px-6 py-2 font-medium rounded-md bg-blue-500 text-white hover:bg-blue-600 transition"
             >
-              Create
+              {submitting ? 'Creating' : 'Create'}
             </button>
           </div>
         </form>
@@ -205,4 +212,4 @@ const CreateGroupModal = ({ setIsCreate }) => {
   );
 };
 
-export default CreateGroupModal;
+export default CreateGroupChat;

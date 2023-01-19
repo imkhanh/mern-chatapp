@@ -3,51 +3,51 @@ const Chat = require('../models/chatModel');
 const User = require('../models/userModel');
 
 const chatController = {
-	getAllMessages: async (req, res) => {
-		const { chatId } = req.params;
+  getMessage: async (req, res) => {
+    const { chatId } = req.params;
 
-		try {
-			const messages = await Message.find({ chatId })
-				.populate('sender', '_id name email image')
-				.populate('chatId');
+    try {
+      const message = await Message.find({ chatId })
+        .populate('sender', '_id name email image')
+        .populate('chatId');
 
-			return res.json(messages);
-		} catch (error) {
-			return res.status(500).json({ error: error.message });
-		}
-	},
-	sendMessage: async (req, res) => {
-		const { chatId, content } = req.body;
+      return res.json(message);
+    } catch (error) {
+      return res.status(500).json({ error: error.message });
+    }
+  },
+  sendMessage: async (req, res) => {
+    const { chatId, content } = req.body;
 
-		if (!chatId || !content) return res.status(400).json({ error: 'Fields must be required' });
+    if (!chatId || !content) return res.status(400).json({ error: 'Fields must be required' });
 
-		try {
-			let message = await Message.create({
-				sender: req.user._id,
-				chatId,
-				content,
-			});
+    try {
+      let message = await Message.create({
+        sender: req.user._id,
+        chatId,
+        content,
+      });
 
-			message = await message.populate('sender', '_id name image');
-			message = await message.populate('chatId');
-			message = await User.populate(message, {
-				path: 'chatId.users',
-				select: 'name email image',
-			});
+      message = await message.populate('sender', '_id name image');
+      message = await message.populate('chatId');
+      message = await User.populate(message, {
+        path: 'chatId.users',
+        select: 'name email image',
+      });
 
-			await Chat.findByIdAndUpdate(
-				chatId,
-				{
-					latestMessage: message,
-				},
-				{ new: true }
-			);
+      await Chat.findByIdAndUpdate(
+        chatId,
+        {
+          latestMessage: message,
+        },
+        { new: true }
+      );
 
-			return res.json(message);
-		} catch (error) {
-			return res.status(500).json({ error: error.message });
-		}
-	},
+      return res.json(message);
+    } catch (error) {
+      return res.status(500).json({ error: error.message });
+    }
+  },
 };
 
 module.exports = chatController;

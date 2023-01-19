@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { IoCloseOutline, IoSyncOutline } from 'react-icons/io5';
-import { ChatState } from 'context/ChatContext';
 import { addToGroup, removeFromGroup, renameGroup, searchUser } from 'api';
+import { IoClose, IoSync } from 'react-icons/io5';
+import { ChatState } from 'context/ChatContext';
 import UserListItem from './UserListItem';
+import Skeleton from './Skeleton';
 import UserBadgeItem from './UserBadgeItem';
 import Loader from './Loader';
 import { toast } from 'react-hot-toast';
 
-const UpdateGroupModal = ({ setIsUpdate }) => {
+const UpdateGroupChat = ({ setIsUpdateGroup }) => {
   const { user, selectedChat, setSelectedChat, fetchAgain, setFetchAgain } = ChatState();
 
   const [search, setSearch] = useState('');
@@ -17,10 +18,15 @@ const UpdateGroupModal = ({ setIsUpdate }) => {
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
+    setGroupName(selectedChat.chatName);
+  }, [selectedChat.chatName]);
+
+  useEffect(() => {
     const handleSearch = async () => {
       if (!search) return;
 
       setLoading(true);
+
       try {
         const { data } = await searchUser(search);
         setUsers(data.users);
@@ -33,7 +39,7 @@ const UpdateGroupModal = ({ setIsUpdate }) => {
     handleSearch();
   }, [search]);
 
-  const handleSubmit = async (e) => {
+  const handleRenameGroup = async (e) => {
     e.preventDefault();
 
     if (!groupName) return;
@@ -41,13 +47,12 @@ const UpdateGroupModal = ({ setIsUpdate }) => {
     setSubmitting(true);
 
     try {
-      const { data } = await renameGroup(selectedChat._id, groupName);
+      const { data } = await renameGroup({ chatId: selectedChat._id, chatName: groupName });
       setSelectedChat(data);
       setFetchAgain(!fetchAgain);
+      toast.success(`Group name has changed to ${data.chatName}`);
 
-      toast.success(`Group name successfully changed to ${data.chatName}`);
-
-      setIsUpdate(false);
+      setIsUpdateGroup(false);
       setSubmitting(false);
     } catch (error) {
       toast.error(error.response.data.error);
@@ -58,25 +63,22 @@ const UpdateGroupModal = ({ setIsUpdate }) => {
 
   const handleAddMember = async (member) => {
     if (user.user._id !== selectedChat.groupAdmin._id) {
-      toast.error('Only admins can add user');
+      toast.error('Only admins can remove member');
       return;
     }
-
-    if (selectedChat.users.find((u) => u._id === member._id)) {
-      toast.error('Member already repersent in this group');
-      return;
-    }
-
     if (member.email === 'guest@gmail.com') {
       toast.error('Guest user can not added to group');
+      return;
+    }
+    if (selectedChat.users.find((user) => user._id === member._id)) {
+      toast.error('Member already repersent in this group');
       return;
     }
 
     setSubmitting(true);
 
     try {
-      const { data } = await addToGroup(selectedChat._id, member._id);
-
+      const { data } = await addToGroup({ chatId: selectedChat._id, userId: member._id });
       setSelectedChat(data);
       setFetchAgain(!fetchAgain);
       setSearch('');
@@ -90,19 +92,16 @@ const UpdateGroupModal = ({ setIsUpdate }) => {
 
   const handleRemoveMember = async (member) => {
     if (user.user._id !== selectedChat.groupAdmin._id) {
-      toast.error('Only admins can add user');
+      toast.error('Only admins can remove member');
       return;
     }
 
     setSubmitting(true);
-
     try {
-      const { data } = await removeFromGroup(selectedChat._id, member._id);
-
+      const { data } = await removeFromGroup({ chatId: selectedChat._id, userId: member._id });
       user.user._id === member._id ? setSelectedChat('') : setSelectedChat(data);
-
       setFetchAgain(!fetchAgain);
-      setSearch('');
+
       setSubmitting(false);
     } catch (error) {
       toast.error(error.response.data.error);
@@ -115,12 +114,10 @@ const UpdateGroupModal = ({ setIsUpdate }) => {
     setSubmitting(true);
 
     try {
-      await removeFromGroup(selectedChat._id, user._id);
-
+      await removeFromGroup({ chatId: selectedChat._id, userId: user._id });
+      setFetchAgain(!fetchAgain);
       setSelectedChat('');
 
-      setFetchAgain(!fetchAgain);
-      setSearch('');
       setSubmitting(false);
     } catch (error) {
       toast.error(error.response.data.error);
@@ -130,20 +127,27 @@ const UpdateGroupModal = ({ setIsUpdate }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 w-full h-full z-50">
-      <div className="relative top-1/2 transform -translate-y-1/2 mx-auto p-8 border border-gray-50 max-w-xl w-full shadow-lg rounded-md bg-white z-[100]">
-        <div className="mb-8 flex items-center justify-between">
-          <span className="text-gray-900 text-xl font-bold">Update Group Chat</span>
-          <span
-            onClick={() => setIsUpdate(false)}
-            className="absolute top-4 right-4 p-2 rounded-full text-gray-600 hover:text-gray-900 bg-gray-50 hover:bg-gray-100 cursor-pointer"
+    <div>
+      <div
+        onClick={() => setIsUpdateGroup(false)}
+        className="fixed inset-0 w-full h-full bg-black/40 z-50"
+      />
+      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 p-8 max-w-xl w-full h-auto bg-white rounded-md shadow-lg z-[100]">
+        <div className="mb-8">
+          <h4 className="text-gray-900 text-xl font-bold">
+            <span className="underline underline-offset-4 decoration-blue-300">Update</span> Group
+          </h4>
+          <button
+            type="button"
+            onClick={() => setIsUpdateGroup(false)}
+            className="absolute top-4 right-4 p-2 rounded-full text-gray-500 hover:text-gray-900 bg-white hover:bg-gray-50 transition"
           >
-            <IoCloseOutline className="text-lg" />
-          </span>
+            <IoClose className="text-lg" />
+          </button>
         </div>
 
         <div className="space-y-6">
-          <form onSubmit={handleSubmit}>
+          <form onSubmit={handleRenameGroup}>
             <label htmlFor="groupName" className="block mb-2 font-medium text-gray-700">
               Group Name
             </label>
@@ -160,12 +164,11 @@ const UpdateGroupModal = ({ setIsUpdate }) => {
           </form>
           <div>
             <label htmlFor="search" className="block mb-2 font-medium text-gray-700">
-              Search
+              Search Name
             </label>
             <div className="relative">
               <input
                 type="text"
-                id="search"
                 name="search"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
@@ -174,16 +177,12 @@ const UpdateGroupModal = ({ setIsUpdate }) => {
           border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-offset-2 focus:ring-blue-200 
           duration-150 ease-linear outline-none rounded-md"
               />
-
               {search && (
-                <span className="absolute top-1/2 right-3 transform -translate-y-1/2 text-lg text-black/40">
+                <span className="absolute top-1/2 right-1 -translate-y-1/2 p-2 text-gray-500 transition hover:text-gray-700 cursor-pointer">
                   {loading ? (
-                    <IoSyncOutline className="text-lg animate-spin" />
+                    <IoSync className="animate-spin" />
                   ) : (
-                    <IoCloseOutline
-                      className="text-lg hover:cursor-pointer"
-                      onClick={() => setSearch('')}
-                    />
+                    <IoClose onClick={() => setSearch('')} />
                   )}
                 </span>
               )}
@@ -192,8 +191,8 @@ const UpdateGroupModal = ({ setIsUpdate }) => {
 
           {selectedChat.users.length > 0 && (
             <div>
-              <label htmlFor="members" className="block mb-2 font-medium text-gray-700">
-                Members
+              <label htmlFor="groupMembers" className="block mb-2 font-medium text-gray-700">
+                Group Members
               </label>
               <div className="flex items-center flex-wrap gap-1.5">
                 {selectedChat.users.map((user) => (
@@ -208,11 +207,9 @@ const UpdateGroupModal = ({ setIsUpdate }) => {
           )}
 
           {search && (
-            <div className="border-l border-sky-500 w-full max-h-[240px] overflow-y-scroll">
+            <div className="w-full max-h-[240px] overflow-y-scroll">
               {loading ? (
-                <div className="h-[240px] flex items-center justify-center text-black/40">
-                  <IoSyncOutline className="text-lg animate-spin" />
-                </div>
+                <Skeleton count={4} />
               ) : users && users.length > 0 ? (
                 users.map((user) => (
                   <UserListItem
@@ -222,30 +219,31 @@ const UpdateGroupModal = ({ setIsUpdate }) => {
                   />
                 ))
               ) : (
-                <div className="h-[240px] flex items-center justify-center text-black/40">
-                  <p>User does not exists</p>
+                <div className="py-8 flex items-center justify-center">
+                  <p className="text-gray-400 font-light italic">User does not exist</p>
                 </div>
               )}
             </div>
           )}
-        </div>
-        <div className="mt-12 space-y-6">
-          <p className="text-gray-600 font-light">
-            By leaving the Group, you will not be able to access old chat and all the chat media
-            will be deleted as well
-          </p>
+          <div>
+            <p className="text-base text-gray-500 font-light">
+              By Leaving the Group, you will not be able to access old chat and all the chat media
+              will be deleted as well
+            </p>
+          </div>
+
           <div className="flex justify-end gap-3">
             <button
               type="button"
-              onClick={() => setIsUpdate(false)}
-              className="px-8 py-2.5 text-sm font-medium text-gray-900 hover:text-red-500 bg-white focus:ring-2 focus:ring-gray-300 rounded-md"
+              onClick={() => setIsUpdateGroup(false)}
+              className="px-6 py-2 font-medium rounded-md text-gray-600 hover:text-gray-900 bg-white hover:bg-gray-100 transition"
             >
               Cancel
             </button>
             <button
-              type="button"
+              type="submit"
               onClick={() => handleLeaveGroup(user.user)}
-              className="px-8 py-2.5 text-sm font-medium text-white bg-red-500 hover:bg-red-600 focus:ring-2 focus:ring-blue-300 rounded-md"
+              className="px-6 py-2 font-medium rounded-md bg-red-500 text-white hover:bg-red-600 transition"
             >
               Leave Group
             </button>
@@ -258,4 +256,4 @@ const UpdateGroupModal = ({ setIsUpdate }) => {
   );
 };
 
-export default UpdateGroupModal;
+export default UpdateGroupChat;

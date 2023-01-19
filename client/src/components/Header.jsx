@@ -1,54 +1,57 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { ChatState } from 'context/ChatContext';
 import {
   IoAlertCircleOutline,
-  IoCloseOutline,
-  IoHelpCircleOutline,
+  IoChevronDown,
+  IoClose,
   IoLogOutOutline,
   IoNotifications,
   IoPersonCircleOutline,
-  IoSearchOutline,
-  IoSyncOutline,
+  IoSettingsOutline,
+  IoSearch,
+  IoSync,
+  IoChevronUp,
 } from 'react-icons/io5';
-import { useNavigate } from 'react-router-dom';
 import { accessChat, searchUser } from 'api';
-import { ChatState } from 'context/ChatContext';
-import Loader from './Loader';
+import { useNavigate } from 'react-router-dom';
+import Skeleton from './Skeleton';
 import UserListItem from './UserListItem';
-import ProfileModal from './ProfileModal';
+import Loader from './Loader';
 
 const Header = () => {
-  const { user, chats, setChats, setSelectedChat } = ChatState();
+  const { user, chats, setChats, setSelecetedChat } = ChatState();
 
   const [search, setSearch] = useState('');
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [loadingChat, setLoadingChat] = useState(false);
-  const [isOpen, setIsOpen] = useState(false);
-  const [selected, setSelected] = useState({
+  const [clicked, setClicked] = useState({
     profile: false,
     notify: false,
   });
 
-  const navigate = useNavigate();
   const divRef = useRef(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const handleClick = (e) => {
       if (divRef.current && !divRef.current.contains(e.target)) {
-        setSelected({ ...selected, profile: false, notify: false });
+        setClicked({ ...clicked, profile: false, notify: false });
         setSearch('');
       }
     };
 
     document.addEventListener('click', handleClick);
+
     return () => document.removeEventListener('click', handleClick);
-  }, [selected]);
+  }, [clicked]);
 
   useEffect(() => {
     const handleSearch = async () => {
       if (!search) return;
 
       setLoading(true);
+
       try {
         const { data } = await searchUser(search);
         setUsers(data.users);
@@ -62,16 +65,16 @@ const Header = () => {
   }, [search]);
 
   const handleAccessChat = async (user) => {
+    setLoading(true);
     setLoadingChat(true);
 
     try {
       const { data } = await accessChat(user);
-
-      if (!chats.find((c) => c._id === data)) {
+      if (!chats.find((item) => item._id === data._id)) {
         setChats([...chats, data]);
       }
-      setSelectedChat(data);
-      setSearch('');
+      setSelecetedChat(data);
+      setLoading(false);
       setLoadingChat(false);
     } catch (error) {
       console.log(error);
@@ -79,111 +82,115 @@ const Header = () => {
   };
 
   const logout = () => {
-    localStorage.removeItem('profile');
+    localStorage.clear();
     navigate('/');
   };
 
   return (
-    <header className="px-8 h-16 flex items-center justify-between border-b border-gray-200">
-      <div className="relative max-w-sm w-full h-10">
-        {search ? null : (
-          <span className="absolute top-1/2 left-3 transform -translate-y-1/2 text-black/40">
-            <IoSearchOutline className="text-lg" />
-          </span>
-        )}
-
+    <header className="bg-white px-8 h-16 flex items-center justify-between border-b border-gray-200">
+      <div className="relative h-10 max-w-sm w-full">
         <input
-          type="text"
           id="search"
-          placeholder="Search"
+          type="text"
+          name="search"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className={`${
-            search ? 'pl-3' : 'pl-10'
-          } w-full h-full placeholder:text-[15px] placeholder:text-black/40 bg-gray-100 outline-none border border-gray-200 rounded-lg duration-150 ease-linear`}
+          placeholder="Search"
+          className="pl-4 pr-10 text-sm w-full h-full bg-white outline-none rounded-lg border border-gray-200 focus:border-blue-500 shadow-sm duration-200 ease-in-out"
         />
+        <span className="absolute top-1/2 right-1 -translate-y-1/2 p-2 text-gray-500 transition hover:text-gray-700 cursor-pointer">
+          {loading ? (
+            <IoSync className="animate-spin" />
+          ) : search ? (
+            <IoClose onClick={() => setSearch('')} />
+          ) : (
+            <IoSearch />
+          )}
+        </span>
 
         {search && (
-          <>
-            <span className="absolute top-1/2 right-3 transform -translate-y-1/2 text-lg text-black/40">
-              {loading ? (
-                <IoSyncOutline className="text-lg animate-spin" />
-              ) : (
-                <IoCloseOutline
-                  className="text-lg hover:cursor-pointer"
-                  onClick={() => setSearch('')}
+          <div className="py-2 absolute mt-2 right-0 origin-top-right w-full max-h-[600px] overflow-y-scroll bg-white border border-gray-100 rounded-md shadow-lg z-10">
+            {loading ? (
+              <Skeleton count={10} />
+            ) : users && users.length > 0 ? (
+              users.map((user) => (
+                <UserListItem
+                  key={user._id}
+                  user={user}
+                  handleClick={() => handleAccessChat(user)}
                 />
-              )}
-            </span>
-            <div
-              className="py-2 absolute mt-2 origin-top-right w-full max-h-[376px] overflow-y-scroll bg-white border border-gray-200 
-      rounded-md shadow-lg z-10"
-            >
-              {loading ? (
-                <div className="h-[360px] flex items-center justify-center text-black/40">
-                  <IoSyncOutline className="text-lg animate-spin" />
-                </div>
-              ) : users && users.length > 0 ? (
-                users.map((user) => (
-                  <UserListItem
-                    key={user._id}
-                    user={user}
-                    handleClick={() => handleAccessChat(user)}
-                  />
-                ))
-              ) : (
-                <div className="h-[360px] flex items-center justify-center text-black/40">
-                  <p>User does not exists</p>
-                </div>
-              )}
-            </div>
-          </>
+              ))
+            ) : (
+              <div className="py-8 flex items-center justify-center">
+                <p className="text-gray-400 font-light italic">User does not exist</p>
+              </div>
+            )}
+          </div>
         )}
       </div>
 
-      <div ref={divRef} className="flex items-center space-x-6">
+      <div ref={divRef} className="flex items-center justify-between gap-8">
         <div className="relative">
-          <div
-            onClick={() => setSelected({ ...selected, profile: !selected.profile, notify: false })}
-            className={`${
-              selected.profile ? 'bg-blue-50 text-blue-600' : 'bg-white'
-            } px-1.5 py-0.5 flex items-center rounded-full cursor-pointer select-none`}
+          <button
+            type="button"
+            onClick={() => setClicked({ ...clicked, notify: !clicked.notify, profile: false })}
+            className="block shrink-0 rounded-full bg-gray-100 p-2.5 text-gray-600 shadow-sm hover:text-gray-700"
+          >
+            <IoNotifications className="text-lg" />
+          </button>
+
+          {clicked.notify && (
+            <ul className="absolute mt-2 right-0 origin-top-right bg-white border border-gray-100 rounded-md shadow-lg z-10">
+              <li>
+                <div className="px-4 py-2 w-80 flex items-center">
+                  <IoPersonCircleOutline />
+                  <span className="ml-3 text-sm">Profile</span>
+                </div>
+              </li>
+            </ul>
+          )}
+        </div>
+
+        <div className="relative">
+          <button
+            type="button"
+            onClick={() => setClicked({ ...clicked, profile: !clicked.profile, notify: false })}
+            className="group flex shrink-0 items-center rounded-lg hover:bg-gray-100 p-1 transition"
           >
             <img
               alt={user.user.name}
               src={user.user.image}
-              className="w-8 h-8 rounded-full bg-white object-cover"
+              className="h-9 w-9 rounded-full object-cover bg-white"
             />
-            <p className="mx-2 text-base">{user.user.name}</p>
-          </div>
+            <p className="mx-2 text-left text-xs">
+              <strong className="block font-medium">{user.user.name}</strong>
+              <span className="text-gray-500"> {user.user.email} </span>
+            </p>
+            {clicked.profile ? (
+              <IoChevronUp className="text-lg" />
+            ) : (
+              <IoChevronDown className="text-lg" />
+            )}
+          </button>
 
-          {selected.profile && (
-            <ul
-              className="absolute mt-2 right-1/2 transform translate-x-1/2 w-52 h-auto bg-white border border-gray-200 
-      rounded-md shadow-lg z-10"
-            >
+          {clicked.profile && (
+            <ul className="absolute mt-2 right-0 origin-top-right w-52 h-auto bg-white border border-gray-100 rounded-md shadow-lg z-10">
               <li>
-                <div
-                  onClick={() => {
-                    setIsOpen(true);
-                    setSelected({ ...selected, notify: false, profile: false });
-                  }}
-                  className="m-1 px-4 py-[10px] flex items-center text-gray-700 hover:text-gray-900 bg-white hover:bg-gray-100 rounded-md cursor-pointer transition-colors"
-                >
-                  <IoPersonCircleOutline className="text-lg" />
-                  <span className="ml-4 text-sm font-medium">Profile</span>
+                <div className="m-1 px-4 py-2 flex items-center text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md transition cursor-pointer select-none">
+                  <IoPersonCircleOutline />
+                  <span className="ml-3 text-sm">Profile</span>
                 </div>
               </li>
               <li>
-                <div className="m-1 px-4 py-[10px] flex items-center text-gray-700 hover:text-gray-900 bg-white hover:bg-gray-100 rounded-md cursor-pointer transition-colors">
-                  <IoAlertCircleOutline className="text-lg" />
-                  <span className="ml-4 text-sm font-medium">Support</span>
+                <div className="m-1 px-4 py-2 flex items-center text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md transition cursor-pointer select-none">
+                  <IoSettingsOutline />
+                  <span className="ml-3 text-sm">Settings</span>
                 </div>
               </li>
               <li>
-                <div className="m-1 px-4 py-[10px] flex items-center text-gray-700 hover:text-gray-900 bg-white hover:bg-gray-100 rounded-md cursor-pointer transition-colors">
-                  <IoHelpCircleOutline className="text-lg" />
-                  <span className="ml-4 text-sm font-medium">Q&A</span>
+                <div className="m-1 px-4 py-2 flex items-center text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md transition cursor-pointer select-none">
+                  <IoAlertCircleOutline />
+                  <span className="ml-3 text-sm">Support</span>
                 </div>
               </li>
               <li>
@@ -192,37 +199,18 @@ const Header = () => {
               <li>
                 <div
                   onClick={logout}
-                  className="m-1 px-4 py-[10px] flex items-center text-gray-700 hover:text-gray-900 bg-white hover:bg-gray-100 rounded-md cursor-pointer transition-colors"
+                  className="m-1 px-4 py-2 flex items-center text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md transition cursor-pointer select-none"
                 >
-                  <IoLogOutOutline className="text-lg" />
-                  <span className="ml-4 text-sm font-medium">Logout</span>
+                  <IoLogOutOutline />
+                  <span className="ml-3 text-sm">Logout</span>
                 </div>
               </li>
             </ul>
           )}
         </div>
-
-        <div className="relative">
-          <span
-            onClick={() => setSelected({ ...selected, notify: !selected.notify, profile: false })}
-            className="block p-2 rounded-full bg-gray-100"
-          >
-            <IoNotifications className="text-lg" />
-          </span>
-
-          {selected.notify && (
-            <div
-              className="absolute mt-2 right-0 origin-top-right w-80 h-full bg-white border border-gray-200 
-              rounded-md shadow-lg z-10"
-            >
-              Notifications
-            </div>
-          )}
-        </div>
       </div>
 
       {loadingChat && <Loader />}
-      {isOpen && <ProfileModal user={user.user} setIsOpen={setIsOpen} />}
     </header>
   );
 };
