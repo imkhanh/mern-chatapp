@@ -16,6 +16,7 @@ const chatController = {
       return res.status(500).json({ error: error.message });
     }
   },
+
   sendMessage: async (req, res) => {
     const { chatId, content } = req.body;
 

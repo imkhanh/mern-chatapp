@@ -1,7 +1,7 @@
 import React from 'react';
 import { IoClose } from 'react-icons/io5';
 
-const Profile = ({ setIsProfile }) => {
+const Profile = ({ user, setIsProfile }) => {
   return (
     <div>
       <div
@@ -20,6 +20,17 @@ const Profile = ({ setIsProfile }) => {
           >
             <IoClose className="text-lg" />
           </button>
+        </div>
+        <div className="flex flex-col items-center justify-center">
+          <img
+            alt={user.name}
+            src={user.image}
+            className="w-40 h-40 rounded-full bg-white object-cover"
+          />
+          <div className="pt-6 text-center">
+            <h2 className="text-sky-600 font-medium">{user.name}</h2>
+            <p className="text-gray-600">{user.email}</p>
+          </div>
         </div>
       </div>
     </div>

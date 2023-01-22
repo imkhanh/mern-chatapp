@@ -1,15 +1,113 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ChatState } from 'context/ChatContext';
 import { getSender } from 'config/ChatLogics';
 import { IoInformation, IoLogoReact, IoSettings } from 'react-icons/io5';
 import Header from './Header';
-import UpdateGroupChat from './UpdateGroupChat';
 import Profile from './Profile';
+import Messages from './Messages';
+import UpdateGroupChat from './UpdateGroupChat';
+import Loader from './Loader';
+import io from 'socket.io-client';
+import { getMessage, sendMessage } from 'api';
+
+var socket, selectedChatCompare;
+const ENDPOINT = process.env.REACT_APP_BASE_URL;
 
 const ChatView = () => {
   const { user, selectedChat } = ChatState();
   const [isUpdateGroup, setIsUpdateGroup] = useState(false);
   const [isProfile, setIsProfile] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [newMessage, setNewMessage] = useState('');
+  const [messages, setMessages] = useState([]);
+  const [socketConnected, setSocketConnected] = useState(false);
+  const [typing, setTyping] = useState(false);
+  const [isTyping, setIsTyping] = useState(false);
+
+  useEffect(() => {
+    socket = io(ENDPOINT);
+    socket.emit('setup', user.user);
+
+    socket.on('connected', () => setSocketConnected(true));
+    socket.on('typing', () => setIsTyping(true));
+    socket.on('stop typing', () => setIsTyping(false));
+
+    // eslint-disable-next-line
+  }, []);
+
+  useEffect(() => {
+    socket.on('message received', (newMessageReceived) => {
+      if (!selectedChatCompare || selectedChatCompare._id !== newMessageReceived.chatId._id) {
+      } else {
+        setMessages([...messages, newMessageReceived]);
+      }
+    });
+  });
+
+  useEffect(() => {
+    fetchMessage();
+
+    selectedChatCompare = selectedChat;
+
+    // eslint-disable-next-line
+  }, [selectedChat]);
+
+  const fetchMessage = async () => {
+    if (!selectedChat) return;
+
+    setLoading(true);
+
+    try {
+      const { data } = await getMessage(selectedChat._id);
+      setMessages(data);
+      socket.emit('join chat', selectedChat._id);
+      setLoading(false);
+    } catch (error) {
+      console.log(error);
+      setLoading(false);
+    }
+  };
+
+  const typingHandler = (e) => {
+    setNewMessage(e.target.value);
+
+    if (!socketConnected) return;
+
+    if (!typing) {
+      setTyping(true);
+      socket.emit('typing', selectedChat._id);
+    }
+
+    let timerLength = 3000;
+    let lastTime = new Date().getTime();
+
+    setTimeout(() => {
+      const timeNow = new Date().getTime();
+      const timeDiff = timeNow - lastTime;
+
+      if (timeDiff >= lastTime && typing) {
+        setTyping(false);
+        socket.emit('stop typing', selectedChat._id);
+      }
+    }, timerLength);
+  };
+
+  const handleSendMessage = async (e) => {
+    e.preventDefault();
+
+    socket.emit('stop typing', selectedChat._id);
+
+    try {
+      const { data } = await sendMessage({ chatId: selectedChat._id, content: newMessage });
+
+      setMessages([...messages, data]);
+      socket.emit('new message', data);
+
+      setNewMessage('');
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   return (
     <section className="w-full h-full">
@@ -70,13 +168,18 @@ const ChatView = () => {
             )}
           </div>
 
-          <div className="flex-1 overflow-y-scroll">1</div>
+          <div className="px-8 flex-1 overflow-y-scroll">
+            {isTyping && <div>Typing...</div>}
+            {loading ? <Loader /> : <Messages messages={messages} />}
+          </div>
 
-          <div className="px-8 pb-4">
-            <form>
+          <div className="px-8 py-4">
+            <form onSubmit={handleSendMessage}>
               <input
                 type="text"
                 name="newMessage"
+                value={newMessage}
+                onChange={typingHandler}
                 placeholder="Type a message"
                 className="p-4 rounded-full w-full h-full bg-gray-100 outline-none border-0"
               />
@@ -84,7 +187,9 @@ const ChatView = () => {
           </div>
 
           {isUpdateGroup && <UpdateGroupChat setIsUpdateGroup={setIsUpdateGroup} />}
-          {isProfile && <Profile setIsProfile={setIsProfile} />}
+          {isProfile && (
+            <Profile user={getSender(user.user, selectedChat.users)} setIsProfile={setIsProfile} />
+          )}
         </div>
       ) : (
         <div

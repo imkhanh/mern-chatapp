@@ -109,7 +109,7 @@ const Header = () => {
         </span>
 
         {search && (
-          <div className="py-2 absolute mt-2 right-0 origin-top-right w-full max-h-[600px] overflow-y-scroll bg-white border border-gray-100 rounded-md shadow-lg z-10">
+          <div className="py-2 absolute mt-2 right-0 origin-top-right w-full max-h-[600px] overflow-y-scroll bg-white border border-gray-200 rounded-md shadow-lg z-20">
             {loading ? (
               <Skeleton count={10} />
             ) : users && users.length > 0 ? (
@@ -174,7 +174,7 @@ const Header = () => {
           </button>
 
           {clicked.profile && (
-            <ul className="absolute mt-2 right-0 origin-top-right w-52 h-auto bg-white border border-gray-100 rounded-md shadow-lg z-10">
+            <ul className="absolute mt-2 right-0 origin-top-right w-52 h-auto bg-white border border-gray-200 rounded-md shadow-lg z-10">
               <li>
                 <div className="m-1 px-4 py-2 flex items-center text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md transition cursor-pointer select-none">
                   <IoPersonCircleOutline />

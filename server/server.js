@@ -1,7 +1,7 @@
 require('dotenv').config();
 const express = require('express');
-const mongoose = require('mongoose');
 const cors = require('cors');
+const mongoose = require('mongoose');
 const { Server } = require('socket.io');
 
 const app = express();
@@ -48,15 +48,17 @@ io.on('connection', (socket) => {
 
   socket.on('join chat', (room) => {
     socket.join(room);
-    console.log('User joined room:::: ' + room);
+    console.log('User joined room:::::' + room);
   });
 
   socket.on('new message', (newMessage) => {
     let chat = newMessage.chatId;
+
     if (!chat.users) return;
 
     chat.users.forEach((user) => {
       if (user._id === newMessage.sender._id) return;
+
       socket.in(user._id).emit('message received', newMessage);
     });
 
