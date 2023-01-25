@@ -1,9 +1,10 @@
 const User = require('../models/userModel');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const asyncHandler = require('express-async-handler');
 
 const userController = {
-  searchUser: async (req, res) => {
+  searchUser: asyncHandler(async (req, res) => {
     try {
       const keyword = req.query.search
         ? {
@@ -23,8 +24,8 @@ const userController = {
     } catch (error) {
       return res.status(500).json(error.message);
     }
-  },
-  register: async (req, res) => {
+  }),
+  register: asyncHandler(async (req, res) => {
     try {
       const { name, email, password, image } = req.body;
       if (!(name && email && password && image))
@@ -52,8 +53,8 @@ const userController = {
     } catch (error) {
       return res.status(500).json(error.message);
     }
-  },
-  login: async (req, res) => {
+  }),
+  login: asyncHandler(async (req, res) => {
     try {
       const { email, password } = req.body;
 
@@ -79,7 +80,7 @@ const userController = {
     } catch (error) {
       return res.status(500).json(error.message);
     }
-  },
+  }),
 };
 
 const generateToken = (id) => {

@@ -76,12 +76,13 @@ const RegisterForm = () => {
             border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-offset-2 focus:ring-blue-200 
             duration-150 ease-linear outline-none rounded-md"
           />
-          <span
+          <button
+            type="button"
             onClick={() => setFormData({ ...formData, showPassword: !formData.showPassword })}
-            className="absolute top-1/2 right-2 transform -translate-y-1/2 block p-2 bg-white hover:bg-gray-100 rounded-full cursor-pointer select-none"
+            className="absolute top-1/2 right-4 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
           >
             {formData.showPassword ? <FaRegEyeSlash /> : <FaRegEye />}
-          </span>
+          </button>
         </div>
       </div>
       <div>
