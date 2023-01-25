@@ -1,7 +1,13 @@
 import React from 'react';
+import Header from './Header';
 
 const ChatView = () => {
-  return <div>ChatView</div>;
+  return (
+    <section className="w-full">
+      <Header />
+      <div>Message</div>
+    </section>
+  );
 };
 
 export default ChatView;

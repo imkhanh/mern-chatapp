@@ -1,23 +1,16 @@
 import React from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import ChatProvider from 'context/ChatContext';
-
-import Home from 'pages/Home';
+import { Routes, Route } from 'react-router-dom';
 import Chats from 'pages/Chats';
-
 import { Toaster } from 'react-hot-toast';
+import Home from 'pages/Home';
 
 const App = () => {
   return (
     <div className="app">
-      <BrowserRouter>
-        <ChatProvider>
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/chats" element={<Chats />} />
-          </Routes>
-        </ChatProvider>
-      </BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/chats" element={<Chats />} />
+      </Routes>
       <Toaster position="top-right" />
     </div>
   );

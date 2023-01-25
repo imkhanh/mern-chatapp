@@ -44,6 +44,7 @@ const userController = {
       await newUser.save();
 
       return res.json({
+        success: 'Register successfully',
         token: generateToken(newUser._id),
         user: {
           ...newUser._doc,

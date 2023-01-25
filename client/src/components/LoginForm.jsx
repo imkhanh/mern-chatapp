@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaRegEye, FaRegEyeSlash } from 'react-icons/fa';
 import { loginReq } from 'api';
+import Loader from './Loader';
 import toast from 'react-hot-toast';
 
 const LoginForm = () => {
@@ -21,16 +22,17 @@ const LoginForm = () => {
   const handleLogin = async (e) => {
     e.preventDefault();
 
+    setFormData({ ...formData, loading: true });
     try {
-      const res = await loginReq(formData);
+      const { data } = await loginReq(formData);
 
-      if (res.data) {
-        localStorage.setItem('token', JSON.stringify(res.data.token));
-        localStorage.setItem('user', JSON.stringify(res.data.user));
-        navigate('/chats');
-      }
+      localStorage.setItem('token', JSON.stringify(data.token));
+      localStorage.setItem('user', JSON.stringify(data.user));
+      navigate('/chats');
+      setFormData({ ...formData, email: '', password: '', showPassword: false, loading: false });
     } catch (error) {
       toast.error(error.response.data.error);
+      setFormData({ ...formData, loading: false });
       return;
     }
   };
@@ -39,10 +41,12 @@ const LoginForm = () => {
     setFormData({ email: 'guest@gmail.com', password: '123123' });
   };
 
+  if (formData.loading) return <Loader />;
+
   return (
     <form onSubmit={handleLogin} className="space-y-6">
       <div>
-        <label htmlFor="email" className="block mb-2 font-medium text-gray-700">
+        <label htmlFor="email" className="block mb-1 font-medium text-gray-700">
           Email Address
         </label>
         <input
@@ -57,7 +61,7 @@ const LoginForm = () => {
         />
       </div>
       <div>
-        <label htmlFor="password" className="block mb-2 font-medium text-gray-700">
+        <label htmlFor="password" className="block mb-1 font-medium text-gray-700">
           Password
         </label>
         <div className="relative">
@@ -90,7 +94,7 @@ const LoginForm = () => {
         <button
           type="button"
           onClick={handleGuestLogin}
-          className="inline-block w-full h-11 font-medium rounded-md transition border border-gray-300 hover:border-gray-500 text-gray-500 hover:text-gray-700"
+          className="inline-block w-full h-11 font-medium rounded-md transition border border-white hover:border-blue-500 text-blue-500 hover:text-blue-600"
         >
           Guest
         </button>

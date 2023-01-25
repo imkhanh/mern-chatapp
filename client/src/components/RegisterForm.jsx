@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { FaCloudUploadAlt, FaRegEye, FaRegEyeSlash } from 'react-icons/fa';
+import { registerReq } from 'api';
 import toast from 'react-hot-toast';
 
 const RegisterForm = () => {
@@ -11,20 +12,70 @@ const RegisterForm = () => {
     showPassword: false,
     loading: false,
   });
+  const [isUpload, setIsUpload] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
 
-  const handleUpload = async (file) => {};
+  const handleUpload = async (file) => {
+    if (!file) {
+      toast.error('File does not exist');
+      return;
+    }
+
+    if (file.type !== 'image/png') {
+      toast.error('Invalid format of Image\n Only .png accepted');
+      return;
+    }
+    setIsUpload(true);
+    try {
+      const form_data = new FormData();
+      form_data.append('file', file);
+      form_data.append('upload_preset', 'fzdh8twv');
+      form_data.append('cloud_name', 'imkhanh');
+
+      const res = await fetch('http://api.cloudinary.com/v1_1/imkhanh/image/upload', {
+        method: 'POST',
+        body: form_data,
+      });
+
+      const data = await res.json();
+
+      setFormData({ ...formData, image: data.secure_url });
+      setIsUpload(false);
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    setFormData({ ...formData, loading: true });
 
     try {
+      const { data } = await registerReq({
+        name: formData.name,
+        email: formData.email,
+        password: formData.password,
+        image: formData.image,
+      });
+
+      toast.success(`${data.success}`);
+
+      setFormData({
+        ...formData,
+        name: '',
+        email: '',
+        password: '',
+        image: null,
+        showPassword: false,
+        loading: false,
+      });
     } catch (error) {
       toast.error(error.response.data.error);
+      setFormData({ ...formData, loading: false });
       return;
     }
   };
@@ -32,7 +83,7 @@ const RegisterForm = () => {
   return (
     <form onSubmit={handleLogin} className="space-y-6">
       <div>
-        <label htmlFor="name" className="block mb-2 font-medium text-gray-700">
+        <label htmlFor="name" className="block mb-1 font-medium text-gray-700">
           Full Name
         </label>
         <input
@@ -47,7 +98,7 @@ const RegisterForm = () => {
         />
       </div>
       <div>
-        <label htmlFor="email" className="block mb-2 font-medium text-gray-700">
+        <label htmlFor="email" className="block mb-1 font-medium text-gray-700">
           Email Address
         </label>
         <input
@@ -62,7 +113,7 @@ const RegisterForm = () => {
         />
       </div>
       <div>
-        <label htmlFor="password" className="block mb-2 font-medium text-gray-700">
+        <label htmlFor="password" className="block mb-1 font-medium text-gray-700">
           Password
         </label>
         <div className="relative">
@@ -86,7 +137,7 @@ const RegisterForm = () => {
         </div>
       </div>
       <div>
-        <label htmlFor="avatar" className="block mb-2 font-medium text-gray-700">
+        <label htmlFor="avatar" className="block mb-1 font-medium text-gray-700">
           Avatar
         </label>
         <div className="relative px-4 h-16 border-dotted border-2 border-gray-200 rounded-md">
@@ -104,6 +155,7 @@ const RegisterForm = () => {
       <div className="">
         <button
           type="submit"
+          disabled={isUpload}
           className="inline-block w-full h-11 font-medium rounded-md transition border border-blue-500 text-white bg-blue-600 hover:bg-blue-500"
         >
           Register
