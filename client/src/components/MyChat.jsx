@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { IoCreateOutline, IoSearchOutline, IoTrashBin } from 'react-icons/io5';
+import { IoCreateOutline, IoNotifications, IoSearchOutline, IoTrashBin } from 'react-icons/io5';
 import { ChatState } from 'context/ChatContext';
 import { getSender } from 'config/ChatLogics';
-import { getAllChats } from 'api';
-import Loader from './Loader';
-import moment from 'moment';
+import { deleteChat, getAllChats } from 'api';
 import CreateGroupChat from './CreateGroupChat';
 import SearchSection from './SearchSection';
+import Account from './Account';
+import Loader from './Loader';
+import moment from 'moment';
 
 const MyChat = () => {
   const { user, selectedChat, setSelectedChat, chats, setChats, fetchAgain } = ChatState();
@@ -24,6 +25,7 @@ const MyChat = () => {
 
     try {
       const { data } = await getAllChats();
+      console.log(data);
       setChats(data);
 
       setLoading(false);
@@ -33,9 +35,21 @@ const MyChat = () => {
     }
   };
 
+  const handleDeleteChat = async (id) => {
+    try {
+      const { data } = await deleteChat(id);
+      if (data && data.success) {
+        fetchAllChats();
+        setSelectedChat(null);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   return (
-    <section className="relative max-w-[400px] w-full bg-white border-r border-gray-200 overflow-hidden">
-      <div>
+    <section className="relative max-w-[400px] w-full bg-white border-r border-gray-200 overflow-y-hidden">
+      <div className="flex-1" style={{ height: 'calc(100% - 64px)' }}>
         <div className="p-4 flex items-center justify-between">
           <span
             onClick={() => {
@@ -47,16 +61,18 @@ const MyChat = () => {
             Chat
           </span>
 
-          <button
-            type="button"
-            onClick={() => {
-              setIsSearch(false);
-              setIsCreateGroupChat(true);
-            }}
-            className="p-2 rounded-full bg-gray-100"
-          >
-            <IoCreateOutline className="text-lg" />
-          </button>
+          <div className="flex space-x-6">
+            <button type="button" className="p-2 rounded-full bg-gray-100">
+              <IoNotifications className="text-lg" />
+            </button>
+            <button
+              type="button"
+              onClick={() => setIsCreateGroupChat(true)}
+              className="p-2 rounded-full bg-gray-100"
+            >
+              <IoCreateOutline className="text-lg" />
+            </button>
+          </div>
         </div>
 
         <div className="p-4">
@@ -69,7 +85,7 @@ const MyChat = () => {
           </div>
         </div>
 
-        <div className="px-2">
+        <div className="px-4">
           {chats &&
             chats.map((chat) => (
               <div
@@ -88,9 +104,9 @@ const MyChat = () => {
                           src={u.image}
                           className={`${
                             chat.users.length === 1
-                              ? 'w-8 h-8 border-2 border-white first:z-10 first:-m-3'
-                              : 'w-12 h-12 border border-white'
-                          } rounded-full bg-white object-cover`}
+                              ? 'w-12 h-12 border'
+                              : 'w-8 h-8 border-2 first:z-10 first:mt-3'
+                          } border-white rounded-full bg-white object-cover`}
                         />
                       ))}
                     </div>
@@ -119,6 +135,7 @@ const MyChat = () => {
 
                 <button
                   type="button"
+                  onClick={() => handleDeleteChat(chat._id)}
                   className="p-2 rounded-full invisible text-gray-400 hover:text-gray-900 group-hover:visible bg-transparent hover:bg-gray-100"
                 >
                   <IoTrashBin className="text-lg" />
@@ -128,8 +145,9 @@ const MyChat = () => {
         </div>
       </div>
 
-      {loading && <Loader />}
+      <Account />
 
+      {loading && <Loader />}
       {isSearch && <SearchSection setIsSearch={setIsSearch} />}
       {isCreateGroupChat && <CreateGroupChat setIsCreateGroupChat={setIsCreateGroupChat} />}
     </section>

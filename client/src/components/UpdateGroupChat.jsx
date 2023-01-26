@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { IoCloseCircle, IoSync } from 'react-icons/io5';
-import { createGroup, searchUser } from 'api';
+import { addToGroup, removeFromGroup, renameGroup, searchUser } from 'api';
 import { ChatState } from 'context/ChatContext';
 import SkeletonItem from './SkeletonItem';
 import UserListItem from './UserListItem';
@@ -8,15 +8,16 @@ import UserBadgeItem from './UserBadgeItem';
 import Loader from './Loader';
 import { toast } from 'react-hot-toast';
 
-const CreateGroupChat = ({ setIsCreateGroupChat }) => {
-  const { user, chats, setChats } = ChatState();
+const UpdateGroupChat = ({ setIsUpdateGroupChat }) => {
+  const { user, selectedChat, setSelectedChat, fetchAgain, setFetchAgain } = ChatState();
 
   const [search, setSearch] = useState('');
   const [groupName, setGroupName] = useState('');
   const [users, setUsers] = useState([]);
-  const [selectedUser, setSelectedUser] = useState([]);
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => setGroupName(selectedChat.chatName), [selectedChat.chatName]);
 
   useEffect(() => {
     const handleSearch = async () => {
@@ -37,49 +38,19 @@ const CreateGroupChat = ({ setIsCreateGroupChat }) => {
     handleSearch();
   }, [search]);
 
-  const handleAddUser = (user) => {
-    if (selectedUser.includes(user)) {
-      toast.error('This user already added to group');
-      return;
-    }
-
-    setSelectedUser([...selectedUser, user]);
-  };
-
-  const handleRemoveUser = (user) => {
-    setSelectedUser(selectedUser.filter((u) => u._id !== user._id));
-  };
-
-  const handleSubmit = async (e) => {
+  const handleRenameGroup = async (e) => {
     e.preventDefault();
-
-    if (user.email === 'guest@gmail.com') {
-      toast.error('Guest user can not create the group');
-      return;
-    }
-
-    if (
-      selectedUser.map((user) => {
-        if (user.email === 'guest@gmail.com') {
-          toast.error('Guest user can not added to group');
-        }
-        return {};
-      })
-    ) {
-    }
+    if (!groupName) return;
 
     setSubmitting(true);
-
     try {
-      const users = JSON.stringify(selectedUser.map((u) => u._id));
+      const { data } = await renameGroup({ chatId: selectedChat._id, chatName: groupName });
+      setSelectedChat(data);
 
-      const { data } = await createGroup({ chatName: groupName, users: users });
-      setChats([...chats, data]);
-
-      toast.success(`${data.chatName} created successfully`);
-
+      toast.success(`A group has changed to ${data.chatName}`);
+      setFetchAgain(!fetchAgain);
       setSubmitting(false);
-      setIsCreateGroupChat(false);
+      setIsUpdateGroupChat(false);
     } catch (error) {
       toast.error(error.response.data.error);
       setSubmitting(false);
@@ -87,20 +58,69 @@ const CreateGroupChat = ({ setIsCreateGroupChat }) => {
     }
   };
 
-  if (submitting) return <Loader />;
+  const handleAddMember = async (member) => {
+    if (user._id !== selectedChat.groupAdmin._id) {
+      toast.error('Only admins can add member');
+      return;
+    }
+
+    if (selectedChat.users.find((u) => u._id === member._id)) {
+      toast.error('This member already repersent in group');
+      return;
+    }
+
+    if (member.email === 'guest@gmail.com') {
+      toast.error('Guest user can not add to group');
+      return;
+    }
+
+    try {
+      const { data } = await addToGroup({ chatId: selectedChat._id, userId: member._id });
+      setSelectedChat(data);
+      setFetchAgain(!fetchAgain);
+    } catch (error) {
+      toast.error(error.response.data.error);
+      return;
+    }
+  };
+
+  const handleRemoveMember = async (member) => {
+    if (user._id !== selectedChat.groupAdmin._id) {
+      toast.error('Only admins can remove member');
+      return;
+    }
+
+    try {
+      const { data } = await removeFromGroup({ chatId: selectedChat._id, userId: member._id });
+
+      user._id === member._id ? setSelectedChat(null) : setSelectedChat(data);
+      setFetchAgain(!fetchAgain);
+    } catch (error) {
+      toast.error(error.response.data.error);
+      return;
+    }
+  };
+
+  const handleLeaveGroup = async (user) => {
+    try {
+    } catch (error) {
+      toast.error(error.response.data.error);
+      return;
+    }
+  };
 
   return (
     <div>
       <div
-        onClick={() => setIsCreateGroupChat(false)}
+        onClick={() => setIsUpdateGroupChat(false)}
         className="fixed inset-0 w-full h-full bg-black/40 z-50"
       />
       <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white max-w-xl w-full h-auto rounded-md z-[100]">
         <div className="px-8 py-4 flex items-center justify-between border-b border-gray-200">
-          <span className="text-xl font-bold text-gray-900">Create Group Chat</span>
+          <span className="text-xl font-bold text-gray-900">Update Group Chat</span>
         </div>
-        <form onSubmit={handleSubmit} className="px-8 py-4 space-y-6">
-          <div>
+        <div className="px-8 py-4 space-y-6">
+          <form onSubmit={handleRenameGroup}>
             <label htmlFor="groupName" className="block mb-1 font-medium text-gray-700">
               Group Name
             </label>
@@ -114,7 +134,7 @@ const CreateGroupChat = ({ setIsCreateGroupChat }) => {
           border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-offset-2 focus:ring-blue-200 
           duration-150 ease-linear outline-none rounded-md"
             />
-          </div>
+          </form>
           <div>
             <label htmlFor="search" className="block mb-1 font-medium text-gray-700">
               Search Name
@@ -144,17 +164,17 @@ const CreateGroupChat = ({ setIsCreateGroupChat }) => {
               )}
             </div>
           </div>
-          {selectedUser.length > 0 && (
+          {selectedChat.users.length > 0 && (
             <div>
               <label htmlFor="groupMember" className="block mb-1 font-medium text-gray-700">
                 Group Members
               </label>
               <div className="flex flex-wrap items-center gap-1.5">
-                {selectedUser.map((user) => (
+                {selectedChat.users.map((user) => (
                   <UserBadgeItem
                     key={user._id}
                     user={user}
-                    handleClick={() => handleRemoveUser(user)}
+                    handleClick={() => handleRemoveMember(user)}
                   />
                 ))}
               </div>
@@ -169,7 +189,7 @@ const CreateGroupChat = ({ setIsCreateGroupChat }) => {
                   <UserListItem
                     key={user._id}
                     user={user}
-                    handleClick={() => handleAddUser(user)}
+                    handleClick={() => handleAddMember(user)}
                   />
                 ))
               ) : (
@@ -179,25 +199,41 @@ const CreateGroupChat = ({ setIsCreateGroupChat }) => {
               )}
             </div>
           )}
-          <div className="flex justify-end gap-3">
-            <button
-              type="button"
-              onClick={() => setIsCreateGroupChat(false)}
-              className="px-6 py-2.5 text-sm font-medium text-gray-500 hover:text-gray-900 bg-white hover:bg-gray-100 rounded-md transition"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              className="px-6 py-2.5 text-sm font-medium text-white bg-blue-500 hover:bg-blue-600 rounded-md transition"
-            >
-              Create
-            </button>
+
+          <div className="pt-4">
+            <div className="mb-4 flex items-start">
+              <span htmlFor="note" className="text-sm font-medium text-gray-700">
+                Note:
+              </span>
+              <p className="ml-1 text-sm">
+                By Leaving the Group, you will not be able to access old chat and all the chat media
+                will be deleted as well
+              </p>
+            </div>
+
+            <div className="flex justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => setIsUpdateGroupChat(false)}
+                className="px-6 py-2.5 text-sm font-medium text-gray-500 hover:text-gray-900 bg-white hover:bg-gray-100 rounded-md transition"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => handleLeaveGroup(user)}
+                className="px-6 py-2.5 text-sm font-medium text-white bg-red-500 hover:bg-red-600 rounded-md transition"
+              >
+                Leave Group
+              </button>
+            </div>
           </div>
-        </form>
+        </div>
       </div>
+
+      {submitting && <Loader />}
     </div>
   );
 };
 
-export default CreateGroupChat;
+export default UpdateGroupChat;
