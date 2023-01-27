@@ -41,7 +41,10 @@ const Account = () => {
   return (
     <header className="px-4 h-16 w-full flex items-center border-t border-gray-200">
       <div ref={divRef} className="relative">
-        <div className="flex items-center cursor-pointer" onClick={() => setIsOpen(!isOpen)}>
+        <div
+          className="flex items-center cursor-pointer select-none"
+          onClick={() => setIsOpen(!isOpen)}
+        >
           <img
             alt={user.name}
             src={user.image}

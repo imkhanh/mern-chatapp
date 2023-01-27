@@ -15,8 +15,8 @@ const Home = () => {
   }, [navigate]);
 
   return (
-    <div className="h-screen bg-slate-100 flex items-center justify-center">
-      <div className="p-8 bg-white max-w-md w-full rounded-md shadow-lg space-y-8">
+    <div className="h-screen bg-gray-100 flex items-center justify-center">
+      <div className="p-8 bg-white max-w-md w-full rounded-3xl shadow-lg space-y-8">
         <div className="flex flex-col items-center justify-center">
           <IoLogoWechat className="text-5xl text-blue-500" />
 

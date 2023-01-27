@@ -2,9 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { IoCloseCircle, IoCloseOutline, IoInformationCircle, IoSync } from 'react-icons/io5';
 import { addToGroup, removeFromGroup, renameGroup, searchUser } from 'api';
 import { ChatState } from 'context/ChatContext';
-import SkeletonItem from './SkeletonItem';
 import UserListItem from './UserListItem';
 import UserBadgeItem from './UserBadgeItem';
+import SkeletonItem from './SkeletonItem';
 import Loader from './Loader';
 import { toast } from 'react-hot-toast';
 
@@ -78,6 +78,7 @@ const UpdateGroupChat = ({ setIsUpdateGroupChat }) => {
       const { data } = await addToGroup({ chatId: selectedChat._id, userId: member._id });
       setSelectedChat(data);
       setFetchAgain(!fetchAgain);
+      setSearch('');
     } catch (error) {
       toast.error(error.response.data.error);
       return;
@@ -128,7 +129,7 @@ const UpdateGroupChat = ({ setIsUpdateGroupChat }) => {
         </div>
         <div className="pb-8 px-8 space-y-6">
           <form onSubmit={handleRenameGroup}>
-            <label htmlFor="groupName" className="block mb-1 text-sm font-bold text-gray-700">
+            <label htmlFor="groupName" className="block mb-1 text-sm font-bold text-gray-900">
               Group Name
             </label>
             <input
@@ -142,7 +143,7 @@ const UpdateGroupChat = ({ setIsUpdateGroupChat }) => {
             />
           </form>
           <div>
-            <label htmlFor="search" className="block mb-1 text-sm font-bold text-gray-700">
+            <label htmlFor="search" className="block mb-1 text-sm font-bold text-gray-900">
               Search Name
             </label>
             <div className="relative">
@@ -171,7 +172,7 @@ const UpdateGroupChat = ({ setIsUpdateGroupChat }) => {
           </div>
           {selectedChat.users.length > 0 && (
             <div>
-              <label htmlFor="groupMember" className="block mb-1 text-sm font-bold text-gray-700">
+              <label htmlFor="groupMember" className="block mb-1 text-sm font-bold text-gray-900">
                 Group Members
               </label>
               <div className="flex flex-wrap items-center gap-1.5">
@@ -186,9 +187,9 @@ const UpdateGroupChat = ({ setIsUpdateGroupChat }) => {
             </div>
           )}
           {search && (
-            <div className="max-h-[300px] overflow-y-scroll bg-white">
+            <div className="max-h-[240px] overflow-y-scroll bg-white">
               {loading ? (
-                <SkeletonItem count={5} />
+                <SkeletonItem count={4} />
               ) : users && users.length > 0 ? (
                 users.map((user) => (
                   <UserListItem
@@ -198,15 +199,15 @@ const UpdateGroupChat = ({ setIsUpdateGroupChat }) => {
                   />
                 ))
               ) : (
-                <div className="px-4 py-8 text-center">
-                  <p className="font-light text-base text-gray-400 italic">User does not exist</p>
+                <div className="h-[240px] flex items-center justify-center">
+                  <p className="font-light text-base text-black/30 italic">User does not exist</p>
                 </div>
               )}
             </div>
           )}
 
-          <div className="space-y-4">
-            <div className="p-4 border-l-4 border-blue-500 flex items-start bg-blue-50 rounded-xl">
+          <div className="pt-8 space-y-6">
+            <div className="p-4 border-l-8 border-blue-500 flex items-start bg-blue-50 rounded-xl">
               <span htmlFor="note" className="block text-blue-500">
                 <IoInformationCircle className="text-lg" />
               </span>
@@ -220,14 +221,14 @@ const UpdateGroupChat = ({ setIsUpdateGroupChat }) => {
               <button
                 type="button"
                 onClick={() => setIsUpdateGroupChat(false)}
-                className="px-6 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 bg-gray-50 hover:bg-white border border-gray-300 hover:border-gray-500 rounded-md transition"
+                className="px-6 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 bg-gray-50 hover:bg-white border border-gray-300 hover:border-gray-400 hover:ring-2 hover:ring-gray-200 hover:ring-offset-2 rounded-md transition"
               >
                 Cancel
               </button>
               <button
                 type="button"
                 onClick={() => handleLeaveGroup(user)}
-                className="px-6 py-2 text-sm font-medium text-white bg-red-500 hover:bg-red-600 border border-red-500 rounded-md transition"
+                className="px-6 py-2 text-sm font-medium text-white bg-red-500 hover:bg-red-600 border border-red-500 hover:ring-2 hover:ring-red-200 hover:ring-offset-2 rounded-md transition"
               >
                 Leave Group
               </button>

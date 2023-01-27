@@ -30,3 +30,6 @@ export const getMessage = (chatId) => API.get(`/message/${chatId}`);
 export const sendMessage = (data) => API.post('/message/send-message', data);
 
 //notitications
+export const getNotification = () => API.get(`/notification`);
+export const addNotification = (data) => API.post(`/notification`, data);
+export const deleteNotification = (notificationId) => API.delete(`/notification/${notificationId}`);

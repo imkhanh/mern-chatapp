@@ -46,7 +46,7 @@ const LoginForm = () => {
   return (
     <form onSubmit={handleLogin} className="space-y-6">
       <div>
-        <label htmlFor="email" className="block mb-1 font-medium text-gray-700">
+        <label htmlFor="email" className="block mb-1 font-medium text-gray-900">
           Email Address
         </label>
         <input
@@ -61,7 +61,7 @@ const LoginForm = () => {
         />
       </div>
       <div>
-        <label htmlFor="password" className="block mb-1 font-medium text-gray-700">
+        <label htmlFor="password" className="block mb-1 font-medium text-gray-900">
           Password
         </label>
         <div className="relative">
@@ -87,14 +87,14 @@ const LoginForm = () => {
       <div className="flex gap-3">
         <button
           type="submit"
-          className="inline-block w-full h-11 font-medium rounded-md transition border border-blue-500 text-white bg-blue-600 hover:bg-blue-500"
+          className="inline-block w-full h-11 font-medium rounded-md transition border border-blue-500 text-white bg-blue-600 hover:bg-blue-500 hover:ring-2 hover:ring-blue-200 hover:ring-offset-2"
         >
           Login
         </button>
         <button
           type="button"
           onClick={handleGuestLogin}
-          className="inline-block w-full h-11 font-medium rounded-md transition border border-white hover:border-blue-500 text-blue-500 hover:text-blue-600"
+          className="inline-block w-full h-11 font-medium rounded-md transition border border-white hover:border-blue-500 text-blue-500 hover:text-blue-600 hover:ring-2 hover:ring-blue-200 hover:ring-offset-2"
         >
           Guest
         </button>

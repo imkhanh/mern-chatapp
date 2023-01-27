@@ -83,7 +83,7 @@ const RegisterForm = () => {
   return (
     <form onSubmit={handleLogin} className="space-y-6">
       <div>
-        <label htmlFor="name" className="block mb-1 font-medium text-gray-700">
+        <label htmlFor="name" className="block mb-1 font-medium text-gray-900">
           Full Name
         </label>
         <input
@@ -98,7 +98,7 @@ const RegisterForm = () => {
         />
       </div>
       <div>
-        <label htmlFor="email" className="block mb-1 font-medium text-gray-700">
+        <label htmlFor="email" className="block mb-1 font-medium text-gray-900">
           Email Address
         </label>
         <input
@@ -113,7 +113,7 @@ const RegisterForm = () => {
         />
       </div>
       <div>
-        <label htmlFor="password" className="block mb-1 font-medium text-gray-700">
+        <label htmlFor="password" className="block mb-1 font-medium text-gray-900">
           Password
         </label>
         <div className="relative">
@@ -137,7 +137,7 @@ const RegisterForm = () => {
         </div>
       </div>
       <div>
-        <label htmlFor="avatar" className="block mb-1 font-medium text-gray-700">
+        <label htmlFor="avatar" className="block mb-1 font-medium text-gray-900">
           Avatar
         </label>
         <div className="relative px-4 h-16 border-dotted border-2 border-gray-200 rounded-md">
@@ -156,7 +156,7 @@ const RegisterForm = () => {
         <button
           type="submit"
           disabled={isUpload}
-          className="inline-block w-full h-11 font-medium rounded-md transition border border-blue-500 text-white bg-blue-600 hover:bg-blue-500"
+          className="inline-block w-full h-11 font-medium rounded-md transition border border-blue-500 text-white bg-blue-600 hover:bg-blue-500 hover:ring-2 hover:ring-blue-200 hover:ring-offset-2"
         >
           Register
         </button>

@@ -102,7 +102,7 @@ const SearchSection = ({ setIsSearch }) => {
               ))
             ) : (
               <div className="px-4 py-8 text-center">
-                <p className="font-light text-base text-gray-400 italic">User does not exist</p>
+                <p className="font-light text-base text-black/30 italic">User does not exist</p>
               </div>
             )}
           </div>

@@ -29,4 +29,45 @@ app.use('/api/notification', require('./routes/notificationRoute'));
 
 // run server
 const PORT = 5000 || process.env.PORT;
-app.listen(PORT, console.log(`Server running on port ::::: ${PORT}`));
+const server = app.listen(PORT, console.log(`Server running on port ::::: ${PORT}`));
+
+const io = require('socket.io')(server, { cors: { pingTimeout: 6000, origin: '*' } });
+
+io.on('connection', (socket) => {
+  console.log('Sockets are in action');
+
+  socket.on('setup', (user) => {
+    socket.join(user._id);
+    console.log(user.name, 'connected');
+    socket.emit('connected');
+  });
+
+  socket.on('join chat', (room) => {
+    socket.join(room);
+    console.log('User joined room::: ' + room);
+  });
+
+  socket.on('new message', (newMessage) => {
+    var chat = newMessage.chatId;
+
+    if (!chat.users) return;
+
+    chat.users.forEach((user) => {
+      if (user._id === newMessage.sender._id) return;
+
+      socket.in(user._id).emit('message received', newMessage);
+    });
+
+    socket.on('typing', (room) => {
+      socket.in(room).emit('typing');
+    });
+
+    socket.on('stop typing', (room) => {
+      socket.in(room).emit('stop typing');
+    });
+  });
+
+  socket.off('setup', () => {
+    socket.leave(user._id);
+  });
+});

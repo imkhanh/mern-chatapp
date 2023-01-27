@@ -1,14 +1,113 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ChatState } from 'context/ChatContext';
 import { getSender } from 'config/ChatLogics';
-import { IoChatbubblesOutline, IoInformation, IoSettings } from 'react-icons/io5';
+import { getMessage, sendMessage } from 'api';
+import { IoInformation, IoLogoWechat, IoSettings } from 'react-icons/io5';
 import ProfileModal from './ProfileModal';
 import UpdateGroupChat from './UpdateGroupChat';
+import Messages from './Messages';
+import Loader from './Loader';
+
+import io from 'socket.io-client';
+
+var socket, selectedChatCompare;
+const ENDPOINT = process.env.REACT_APP_BASE_URL;
 
 const ChatView = () => {
-  const { user, selectedChat } = ChatState();
+  const { user, selectedChat, notification, setNotification, fetchAgain, setFetchAgain } =
+    ChatState();
   const [isProfile, setIsProfile] = useState(false);
   const [isUpdateGroupChat, setIsUpdateGroupChat] = useState(false);
+  const [newMessage, setNewMessage] = useState('');
+  const [messages, setMessages] = useState([]);
+  const [connected, setConnected] = useState(false);
+  const [typing, setTyping] = useState(false);
+  const [isTyping, setIsTyping] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    socket = io(ENDPOINT);
+    socket.emit('setup', user);
+    socket.on('connected', () => setConnected(true));
+    socket.on('typing', () => setIsTyping(true));
+    socket.on('stop typing', () => setIsTyping(false));
+
+    // eslint-disable-next-line
+  }, []);
+
+  useEffect(() => {
+    socket.on('message received', (newMessageReceived) => {
+      if (!selectedChatCompare || selectedChatCompare._id !== newMessageReceived.chatId._id) {
+        if (!notification.includes()) {
+          setNotification([...notification, newMessageReceived]);
+          setFetchAgain(!fetchAgain);
+        }
+      } else {
+        setMessages([...messages, newMessageReceived]);
+      }
+    });
+  });
+
+  useEffect(() => {
+    fetchMessage();
+    selectedChatCompare = selectedChat;
+    // eslint-disable-next-line
+  }, [selectedChat]);
+
+  const fetchMessage = async () => {
+    if (!selectedChat) return;
+
+    setLoading(true);
+
+    try {
+      const { data } = await getMessage(selectedChat._id);
+      setMessages(data);
+
+      socket.emit('join chat', selectedChat._id);
+      setLoading(false);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  const typingHandler = (e) => {
+    setNewMessage(e.target.value);
+
+    if (!connected) return;
+
+    if (!typing) {
+      setTyping(true);
+      socket.emit('typing', selectedChat._id);
+    }
+
+    const length = 3000;
+    const lastTimeTyping = new Date().getTime();
+
+    setTimeout(() => {
+      const timeNow = new Date().getTime();
+      const timeDiff = timeNow - lastTimeTyping;
+
+      if (timeDiff > length && typing) {
+        setTyping(false);
+        socket.emit('stop typing', selectedChat._id);
+      }
+    }, length);
+  };
+
+  const handleSendeMessage = async (e) => {
+    e.preventDefault();
+
+    socket.emit('stop typing', selectedChat._id);
+
+    try {
+      const { data } = await sendMessage({ chatId: selectedChat._id, content: newMessage });
+      setMessages([...messages, data]);
+      socket.emit('new message', data);
+      setNewMessage('');
+    } catch (error) {
+      console.log(error);
+      return;
+    }
+  };
 
   return (
     <>
@@ -68,13 +167,18 @@ const ChatView = () => {
             )}
           </div>
 
-          <div className="px-8 flex-1">Message</div>
+          <div className="px-8 flex-1 overflow-y-scroll">
+            {loading ? <Loader /> : <Messages messages={messages} />}
+          </div>
+          {isTyping && <span className="block text-center text-black/40">Typing....</span>}
 
           <div className="px-8 py-4">
-            <form>
+            <form onSubmit={handleSendeMessage}>
               <input
                 type="text"
                 name="newMessage"
+                value={newMessage}
+                onChange={typingHandler}
                 placeholder="Type a message"
                 className="p-4 bg-gray-100 w-full h-full rounded-full outline-none border-0"
               />
@@ -92,8 +196,8 @@ const ChatView = () => {
           style={{ height: 'calc(100% - 64px)' }}
         >
           <div className="mb-1 flex items-center">
-            <IoChatbubblesOutline className="text-5xl" />
-            <h1 className="ml-3 text-6xl font-bold">mechat</h1>
+            <IoLogoWechat className="text-6xl text-blue-500" />
+            <h1 className="ml-3 text-6xl font-bold">MeChat</h1>
           </div>
           <p className="text-lg text-gray-500">Select on a user to start chat</p>
         </section>

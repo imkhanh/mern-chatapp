@@ -6,14 +6,7 @@ const asyncHandler = require('express-async-handler');
 const userController = {
   searchUser: asyncHandler(async (req, res) => {
     try {
-      const keyword = req.query.search
-        ? {
-            $or: [
-              { name: { $regex: req.query.search, $options: 'i' } },
-              { email: { $regex: req.query.search, $options: 'i' } },
-            ],
-          }
-        : {};
+      const keyword = req.query.search ? { name: { $regex: req.query.search, $options: 'i' } } : {};
 
       const users = await User.find(keyword).find({ _id: { $ne: req.user._id } });
 

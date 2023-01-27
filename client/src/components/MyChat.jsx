@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { IoCreateOutline, IoNotifications, IoSearchOutline, IoTrashBin } from 'react-icons/io5';
 import { ChatState } from 'context/ChatContext';
 import { getSender } from 'config/ChatLogics';
-import { deleteChat, getAllChats } from 'api';
+import { addNotification, deleteChat, deleteNotification, getAllChats, getNotification } from 'api';
 import CreateGroupChat from './CreateGroupChat';
 import SearchSection from './SearchSection';
 import Account from './Account';
@@ -10,10 +10,72 @@ import Loader from './Loader';
 import moment from 'moment';
 
 const MyChat = () => {
-  const { user, selectedChat, setSelectedChat, chats, setChats, fetchAgain } = ChatState();
+  const {
+    user,
+    selectedChat,
+    setSelectedChat,
+    chats,
+    setChats,
+    fetchAgain,
+    notification,
+    setNotification,
+  } = ChatState();
   const [loading, setLoading] = useState(false);
   const [isCreateGroupChat, setIsCreateGroupChat] = useState(false);
   const [isSearch, setIsSearch] = useState(false);
+  const [showNoti, setShowNoti] = useState(false);
+
+  const notiRef = useRef(null);
+
+  useEffect(() => {
+    const handleClick = (e) => {
+      if (notiRef.current && !notiRef.current.contains(e.target)) {
+        setShowNoti(false);
+      }
+    };
+    document.addEventListener('click', handleClick);
+
+    return () => document.removeEventListener('click', handleClick);
+  }, []);
+
+  useEffect(() => {
+    postNotification();
+    // eslint-disable-next-line
+  }, [notification]);
+
+  const postNotification = async () => {
+    if (!notification.length) return;
+
+    try {
+      await addNotification({
+        notification: notification[0].chatId.latestMessage,
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    fetchNotification();
+    // eslint-disable-next-line
+  }, []);
+
+  const fetchNotification = async () => {
+    try {
+      const { data } = await getNotification();
+      setNotification(data.map((notify) => notify.notificationId));
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const handleRemoveNotify = async (id) => {
+    try {
+      await deleteNotification(id);
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   useEffect(() => {
     fetchAllChats();
@@ -25,7 +87,6 @@ const MyChat = () => {
 
     try {
       const { data } = await getAllChats();
-      console.log(data);
       setChats(data);
 
       setLoading(false);
@@ -62,12 +123,43 @@ const MyChat = () => {
           </span>
 
           <div className="flex space-x-6">
-            <button
-              type="button"
-              className="p-2 rounded-full text-gray-600 hover:text-gray-900 bg-gray-100"
-            >
-              <IoNotifications className="text-lg" />
-            </button>
+            <div ref={notiRef} className="relative">
+              <button
+                type="button"
+                onClick={() => setShowNoti(!showNoti)}
+                className="p-2 rounded-full text-gray-600 hover:text-gray-900 bg-gray-100"
+              >
+                <IoNotifications className="text-lg" />
+                {notification.length > 0 && (
+                  <span className="block absolute -top-2 -right-2 w-5 h-5 rounded-full bg-red-500 text-xs text-white border-2 border-white">
+                    {notification?.length}
+                  </span>
+                )}
+              </button>
+
+              {showNoti && (
+                <div className="absolute mt-2 right-0 origin-top-right bg-white border border-gray-100 shadow-lg rounded-md z-10">
+                  {!notification.length && <div className="w-90">Notification</div>}
+                  {notification.map((notify) => (
+                    <div key={notify._id} className="flex items-center">
+                      <div
+                        onClick={() => {
+                          setSelectedChat(notify.chatId);
+                          setNotification(notification.map((n) => n !== notify));
+                        }}
+                        className="flex-1 cursor-pointer"
+                      >
+                        {notify.chatId?.isGroupChat
+                          ? `New message in ${notify.chatId?.chatName}`
+                          : `New message from ${notify.sender?.name}`}
+                      </div>
+
+                      <span onClick={() => handleRemoveNotify(notify.chatId?._id)}>Remove</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
             <button
               type="button"
               onClick={() => setIsCreateGroupChat(true)}
@@ -124,10 +216,14 @@ const MyChat = () => {
                     <h4 className="text-base font-light">
                       {chat.isGroupChat ? chat.chatName : getSender(user, chat.users).name}
                     </h4>
-                    <div className="text-sm text-black/40 font-light space-x-2">
+                    <div className="flex items-center text-sm text-black/40 font-light space-x-2">
                       {chat.latestMessage?.content && (
                         <>
-                          <p>{chat.latestMessage?.content}</p>
+                          <p>
+                            {chat.latestMessage?.content?.length < 15
+                              ? chat.latestMessage?.content
+                              : chat.latestMessage?.content.slice(0, 15) + '...'}
+                          </p>
                           <p>-</p>
                         </>
                       )}
