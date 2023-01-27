@@ -4,7 +4,7 @@ const UserListItem = ({ user, handleClick }) => {
   return (
     <div
       onClick={handleClick}
-      className="px-4 py-2 flex items-center hover:bg-gray-100 transition cursor-pointer"
+      className="px-4 py-2 flex items-center hover:bg-gray-100 transition cursor-pointer rounded-md"
     >
       <img
         alt={user.name}

@@ -19,10 +19,10 @@ export const getAllChats = () => API.get('/chat/get-all');
 export const accessChat = (user) => API.post('/chat/access-chat', { user });
 
 export const createGroup = (data) => API.post('/chat/create-group', data);
-export const addToGroup = (data) => API.post('/chat/add-group', data);
-export const renameGroup = (data) => API.post(`/chat/rename-group`, data);
-export const removeFromGroup = (data) => API.post('/chat/remove-group', data);
-export const deleteChat = (chatId) => API.post('/chat/delete-chat', { chatId });
+export const addToGroup = (data) => API.patch('/chat/add-group', data);
+export const renameGroup = (data) => API.patch(`/chat/rename-group`, data);
+export const removeFromGroup = (data) => API.patch('/chat/remove-group', data);
+export const deleteChat = (chatId) => API.delete(`/chat/delete-chat/${chatId}`);
 
 //messages
 

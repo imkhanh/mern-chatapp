@@ -62,13 +62,16 @@ const MyChat = () => {
           </span>
 
           <div className="flex space-x-6">
-            <button type="button" className="p-2 rounded-full bg-gray-100">
+            <button
+              type="button"
+              className="p-2 rounded-full text-gray-600 hover:text-gray-900 bg-gray-100"
+            >
               <IoNotifications className="text-lg" />
             </button>
             <button
               type="button"
               onClick={() => setIsCreateGroupChat(true)}
-              className="p-2 rounded-full bg-gray-100"
+              className="p-2 rounded-full text-gray-600 hover:text-gray-900 bg-gray-100"
             >
               <IoCreateOutline className="text-lg" />
             </button>

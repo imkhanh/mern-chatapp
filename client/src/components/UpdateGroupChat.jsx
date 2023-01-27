@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { IoCloseCircle, IoSync } from 'react-icons/io5';
+import { IoCloseCircle, IoCloseOutline, IoInformationCircle, IoSync } from 'react-icons/io5';
 import { addToGroup, removeFromGroup, renameGroup, searchUser } from 'api';
 import { ChatState } from 'context/ChatContext';
 import SkeletonItem from './SkeletonItem';
@@ -113,15 +113,22 @@ const UpdateGroupChat = ({ setIsUpdateGroupChat }) => {
     <div>
       <div
         onClick={() => setIsUpdateGroupChat(false)}
-        className="fixed inset-0 w-full h-full bg-black/40 z-50"
+        className="fixed inset-0 w-full h-full bg-black opacity-50 z-50"
       />
-      <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white max-w-xl w-full h-auto rounded-md z-[100]">
-        <div className="px-8 py-4 flex items-center justify-between border-b border-gray-200">
-          <span className="text-xl font-bold text-gray-900">Update Group Chat</span>
+      <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white max-w-xl w-full h-auto rounded-2xl z-[100]">
+        <div className="relative p-8 flex items-center justify-between">
+          <span className="text-2xl font-bold text-gray-900">Update Group Chat</span>
+          <button
+            type="button"
+            onClick={() => setIsUpdateGroupChat(false)}
+            className="absolute top-4 right-4 p-2 rounded-full bg-white hover:bg-gray-100 text-gray-500 hover:text-gray-900 transition"
+          >
+            <IoCloseOutline className="text-lg" />
+          </button>
         </div>
-        <div className="px-8 py-4 space-y-6">
+        <div className="pb-8 px-8 space-y-6">
           <form onSubmit={handleRenameGroup}>
-            <label htmlFor="groupName" className="block mb-1 font-medium text-gray-700">
+            <label htmlFor="groupName" className="block mb-1 text-sm font-bold text-gray-700">
               Group Name
             </label>
             <input
@@ -129,14 +136,13 @@ const UpdateGroupChat = ({ setIsUpdateGroupChat }) => {
               name="groupName"
               value={groupName}
               onChange={(e) => setGroupName(e.target.value)}
-              placeholder="Please enter group name"
               className="px-4 w-full h-11 text-gray-700 bg-white placeholder:text-gray-400 placeholder:font-light 
           border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-offset-2 focus:ring-blue-200 
           duration-150 ease-linear outline-none rounded-md"
             />
           </form>
           <div>
-            <label htmlFor="search" className="block mb-1 font-medium text-gray-700">
+            <label htmlFor="search" className="block mb-1 text-sm font-bold text-gray-700">
               Search Name
             </label>
             <div className="relative">
@@ -145,7 +151,6 @@ const UpdateGroupChat = ({ setIsUpdateGroupChat }) => {
                 name="search"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="Please enter user name"
                 className="px-4 w-full h-11 text-gray-700 bg-white placeholder:text-gray-400 placeholder:font-light 
           border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-offset-2 focus:ring-blue-200 
           duration-150 ease-linear outline-none rounded-md"
@@ -166,7 +171,7 @@ const UpdateGroupChat = ({ setIsUpdateGroupChat }) => {
           </div>
           {selectedChat.users.length > 0 && (
             <div>
-              <label htmlFor="groupMember" className="block mb-1 font-medium text-gray-700">
+              <label htmlFor="groupMember" className="block mb-1 text-sm font-bold text-gray-700">
                 Group Members
               </label>
               <div className="flex flex-wrap items-center gap-1.5">
@@ -200,12 +205,12 @@ const UpdateGroupChat = ({ setIsUpdateGroupChat }) => {
             </div>
           )}
 
-          <div className="pt-4">
-            <div className="mb-4 flex items-start">
-              <span htmlFor="note" className="text-sm font-medium text-gray-700">
-                Note:
+          <div className="space-y-4">
+            <div className="p-4 border-l-4 border-blue-500 flex items-start bg-blue-50 rounded-xl">
+              <span htmlFor="note" className="block text-blue-500">
+                <IoInformationCircle className="text-lg" />
               </span>
-              <p className="ml-1 text-sm">
+              <p className="ml-4 text-sm font-light text-blue-800">
                 By Leaving the Group, you will not be able to access old chat and all the chat media
                 will be deleted as well
               </p>
@@ -215,14 +220,14 @@ const UpdateGroupChat = ({ setIsUpdateGroupChat }) => {
               <button
                 type="button"
                 onClick={() => setIsUpdateGroupChat(false)}
-                className="px-6 py-2.5 text-sm font-medium text-gray-500 hover:text-gray-900 bg-white hover:bg-gray-100 rounded-md transition"
+                className="px-6 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 bg-gray-50 hover:bg-white border border-gray-300 hover:border-gray-500 rounded-md transition"
               >
                 Cancel
               </button>
               <button
                 type="button"
                 onClick={() => handleLeaveGroup(user)}
-                className="px-6 py-2.5 text-sm font-medium text-white bg-red-500 hover:bg-red-600 rounded-md transition"
+                className="px-6 py-2 text-sm font-medium text-white bg-red-500 hover:bg-red-600 border border-red-500 rounded-md transition"
               >
                 Leave Group
               </button>

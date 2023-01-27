@@ -150,10 +150,10 @@ const chatController = {
     }
   }),
   deleteChat: asyncHandler(async (req, res) => {
-    const { chatId } = req.body;
+    const { chatId } = req.params;
 
     try {
-      await Chat.findByIdAndUpdate({ _id: chatId });
+      await Chat.findByIdAndDelete(chatId);
       return res.json({ success: true });
     } catch (error) {
       return res.status(500).json({ error: error.message });

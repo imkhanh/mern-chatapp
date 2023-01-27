@@ -54,7 +54,7 @@ const SearchSection = ({ setIsSearch }) => {
     }
   };
   return (
-    <section className="absolute top-[82px] left-0 w-full h-full bg-white z-20">
+    <section className="absolute top-[82px] left-0 w-full h-[83%] bg-white z-20">
       <div className="mx-4 relative flex items-center space-x-2">
         <button
           type="button"
@@ -89,9 +89,9 @@ const SearchSection = ({ setIsSearch }) => {
             <IoSearchOutline className="text-lg" />{' '}
             <span className="ml-6 font-light">Search for "{search}"</span>
           </div>
-          <div className="max-h-[720px] overflow-y-scroll bg-white">
+          <div className="max-h-[600px] overflow-y-scroll bg-white">
             {loading ? (
-              <SkeletonItem count={12} />
+              <SkeletonItem count={10} />
             ) : users && users.length > 0 ? (
               users.map((user) => (
                 <UserListItem
