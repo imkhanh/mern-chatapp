@@ -37,7 +37,7 @@ const Messages = ({ messages }) => {
                     ? '1.6rem 1.6rem 1.6rem 0'
                     : '1.6rem 1.6rem 0 1.6rem',
                 marginLeft: getSameMarginLeft(messages, message, index, user._id),
-                marginTop: getSameMarginTop(messages, message, index) ? 4 : 24,
+                marginTop: getSameMarginTop(messages, message, index) ? 6 : 24,
               }}
             >
               {message.content}

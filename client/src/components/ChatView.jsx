@@ -9,6 +9,7 @@ import Messages from './Messages';
 import Loader from './Loader';
 
 import io from 'socket.io-client';
+import Header from './Header';
 
 var socket, selectedChatCompare;
 const ENDPOINT = process.env.REACT_APP_BASE_URL;
@@ -110,13 +111,15 @@ const ChatView = () => {
   };
 
   return (
-    <>
+    <section className="w-full bg-white">
+      <Header />
+
       {selectedChat ? (
-        <section
+        <div
           className="w-full bg-white flex flex-col"
-          style={{ width: '100%', height: 'calc(100%)' }}
+          style={{ width: '100%', height: 'calc(100% - 64px)' }}
         >
-          <div className="px-8 h-16 flex items-center justify-between border-b">
+          <div className="px-8 h-16 flex items-center justify-between border-b border-gray-100">
             {selectedChat.isGroupChat ? (
               <>
                 <div className="flex items-center">
@@ -172,7 +175,7 @@ const ChatView = () => {
           </div>
           {isTyping && <span className="block text-center text-black/40">Typing....</span>}
 
-          <div className="px-8 py-4">
+          <div className="px-8 py-2">
             <form onSubmit={handleSendeMessage}>
               <input
                 type="text"
@@ -189,7 +192,7 @@ const ChatView = () => {
             <ProfileModal user={getSender(user, selectedChat.users)} setIsProfile={setIsProfile} />
           )}
           {isUpdateGroupChat && <UpdateGroupChat setIsUpdateGroupChat={setIsUpdateGroupChat} />}
-        </section>
+        </div>
       ) : (
         <section
           className="w-full bg-white flex flex-col items-center justify-center"
@@ -202,7 +205,7 @@ const ChatView = () => {
           <p className="text-lg text-gray-500">Select on a user to start chat</p>
         </section>
       )}
-    </>
+    </section>
   );
 };
 
