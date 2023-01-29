@@ -15,6 +15,7 @@
 
  <hr/>
 
-Login
-![Screenshot](screenshot.png)
+### Login
+
+![Screenshot](https://raw.github.com/imkhanh/mern-chat/screenshot/1.png)
 
