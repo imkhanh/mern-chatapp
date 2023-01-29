@@ -1,5 +1,6 @@
-# mern-chatapp
+# CHAT APP using MERN stack and SOCKET.IO 
 
+## Features
 - Authentication
 - Real-time Chat
 - Real-time Notification
