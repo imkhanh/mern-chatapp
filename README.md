@@ -19,3 +19,20 @@
 
 ![Screenshot](https://raw.github.com/imkhanh/mern-chatapp/master/screenshot/1.png)
 
+### Register
+
+![Screenshot](https://raw.github.com/imkhanh/mern-chatapp/master/screenshot/2.png)
+
+### Chat
+
+![Screenshot](https://raw.github.com/imkhanh/mern-chatapp/master/screenshot/3.png)
+
+### Search User
+
+![Screenshot](https://raw.github.com/imkhanh/mern-chatapp/master/screenshot/4.png)
+
+### Create Group Chat
+
+![Screenshot](https://raw.github.com/imkhanh/mern-chatapp/master/screenshot/5.png)
+
+
