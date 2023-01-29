@@ -25,7 +25,7 @@
 
 ### Chat
 
-![Screenshot](https://raw.github.com/imkhanh/mern-chatapp/master/screenshot/4.png)
+![Screenshot](https://raw.github.com/imkhanh/mern-chatapp/master/screenshot/5.png)
 
 ### Search User
 
