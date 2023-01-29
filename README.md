@@ -25,14 +25,14 @@
 
 ### Chat
 
-![Screenshot](https://raw.github.com/imkhanh/mern-chatapp/master/screenshot/3.png)
+![Screenshot](https://raw.github.com/imkhanh/mern-chatapp/master/screenshot/4.png)
 
 ### Search User
 
-![Screenshot](https://raw.github.com/imkhanh/mern-chatapp/master/screenshot/4.png)
+![Screenshot](https://raw.github.com/imkhanh/mern-chatapp/master/screenshot/3.png)
 
 ### Create Group Chat
 
-![Screenshot](https://raw.github.com/imkhanh/mern-chatapp/master/screenshot/5.png)
+![Screenshot](https://raw.github.com/imkhanh/mern-chatapp/master/screenshot/4.png)
 
 
