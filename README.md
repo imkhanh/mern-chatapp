@@ -43,4 +43,8 @@
 
 ![Screenshot](https://raw.github.com/imkhanh/mern-chatapp/master/screenshot/7.png)
 
+### Profile
+
+![Screenshot](https://raw.github.com/imkhanh/mern-chatapp/master/screenshot/8.png)
+
 
