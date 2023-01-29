@@ -35,4 +35,12 @@
 
 ![Screenshot](https://raw.github.com/imkhanh/mern-chatapp/master/screenshot/4.png)
 
+### Update Group Chat
+
+![Screenshot](https://raw.github.com/imkhanh/mern-chatapp/master/screenshot/6.png)
+
+### Joined Chat
+
+![Screenshot](https://raw.github.com/imkhanh/mern-chatapp/master/screenshot/7.png)
+
 
