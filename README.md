@@ -48,3 +48,8 @@
 ![Screenshot](https://raw.github.com/imkhanh/mern-chatapp/master/screenshot/8.png)
 
 
+### Notifications
+
+![Screenshot](https://raw.github.com/imkhanh/mern-chatapp/master/screenshot/9.png)
+
+
