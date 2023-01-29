@@ -10,7 +10,7 @@ const ProfileModal = ({ user, setIsProfile }) => {
       />
       <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white max-w-xl w-full h-auto rounded-2xl z-[100]">
         <div className="relative p-8 flex items-center justify-between">
-          <span className="text-2xl font-bold text-gray-900">Update Group Chat</span>
+          <span className="text-2xl font-bold text-gray-900">Profile</span>
           <button
             type="button"
             onClick={() => setIsProfile(false)}
