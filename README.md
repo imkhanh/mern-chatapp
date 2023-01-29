@@ -17,5 +17,5 @@
 
 ### Login
 
-![Screenshot](screenshot.png)
+![Screenshot](https://raw.github.com/imkhanh/mern-chat/screenshot/1.png)
 
