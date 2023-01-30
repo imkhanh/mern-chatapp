@@ -1,9 +1,9 @@
 # MECHAT 
 > Chat App using MERN stack and Socket.io
  
- <hr/>
- 
- ## Features
+Visit: [Demo](https://mern-chat-app-udyr.onrender.com/)
+
+## Features
 - Authentication
 - Real-time chat
 - Real-time Notification
