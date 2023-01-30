@@ -27,6 +27,15 @@ app.use('/api/chat', require('./routes/chatRoute'));
 app.use('/api/message', require('./routes/messageRoute'));
 app.use('/api/notification', require('./routes/notificationRoute'));
 
+if (process.env.NODE_ENV === 'production') {
+  //*Set static folder up in production
+  app.use(express.static('client/build'));
+
+  app.get('*', (req, res) =>
+    res.sendFile(path.resolve(__dirname, 'client', 'build', 'index.html'))
+  );
+}
+
 // run server
 const PORT = 5000 || process.env.PORT;
 const server = app.listen(PORT, console.log(`Server running on port ::::: ${PORT}`));
