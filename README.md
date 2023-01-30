@@ -1,7 +1,7 @@
 # MECHAT 
 > Chat App using MERN stack and Socket.io
- 
-Visit: [Demo](https://mern-chat-app-udyr.onrender.com/)
+
+Demo: [https://mern-chat-app-udyr.onrender.com/](https://mern-chat-app-udyr.onrender.com/)
 
 ## Features
 - Authentication
